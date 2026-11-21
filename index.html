@@ -1,0 +1,1816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060b16">
+<title>Counter Forge: MLBB</title>
+<style>
+/* ============================================================
+   COUNTER FORGE: broadcast skin
+   Language: esports broadcast graphics. Flat panels, chamfered
+   corners, team colours, condensed DIN type, hard edges.
+   No glass, no glow, no soft shadow, no radius.
+   Dial: ENERGY 3 / RHYTHM 2 / MOTION 1
+   ============================================================ */
+
+:root{
+  --bg:#090c11;
+  --panel:#1c2433;
+  --panel2:#232c40;
+  --line:#33405e;
+  --edge:#6577a0;
+
+  --txt:#f4f7fc;
+  --mut:#a9b6cd;
+  --dim:#8a99b5;
+
+  --blue:#2469e8;      /* fill, carries white text */
+  --blueTxt:#6ea8ff;   /* text on dark surfaces */
+  --red:#e02a3c;       /* fill, carries white text */
+  --redTxt:#ff6b78;    /* text on dark surfaces */
+  --gold:#f7b731;
+  --ok:#3ddc97;
+
+  --ch:10px;           /* the chamfer. one motif, used everywhere */
+
+  --font-disp:"Bahnschrift","Arial Narrow","Segoe UI",sans-serif;
+  --font-body:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font:400 14px/1.5 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input{font-family:inherit;font-size:16px}
+img{display:block}
+svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+[hidden]{display:none !important}
+
+/* focus: one unmistakable ring, globally */
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* motion: hover states only. MOTION 1 */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+
+/* ---------- app frame ---------- */
+.app{min-height:100%;display:flex;flex-direction:column}
+.stage{flex:1;padding:16px 18px 26px;max-width:1560px;width:100%;margin:0 auto}
+.view{display:block}
+
+/* ---------- top bar + nav ---------- */
+.bar{
+  display:flex;align-items:center;gap:22px;
+  padding:0 18px;height:58px;
+  background:var(--panel);
+  border-bottom:2px solid var(--gold);
+}
+.brand{display:flex;align-items:center;gap:11px;flex:0 0 auto}
+.brandMark{
+  font:800 15px/1 var(--font-disp);letter-spacing:.02em;
+  color:#090c11;background:var(--gold);
+  padding:7px 9px 6px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%);
+}
+.brandName{font:800 16px/1.05 var(--font-disp);letter-spacing:.06em;text-transform:uppercase}
+.brandSub{font:700 9.5px/1 var(--font-disp);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+
+.barNav{display:flex;gap:6px;flex:1 1 auto;min-width:0}
+.navTab{
+  font:700 12.5px/1 var(--font-disp);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mut);padding:11px 20px 11px 24px;min-height:44px;
+  clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
+  transition:background .12s,color .12s;
+}
+.navTab:hover{color:var(--txt);background:var(--panel2)}
+.navTab.is-active{background:var(--blue);color:#fff}
+
+.barInfo{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+.chip{
+  font:700 11px/1 var(--font-disp);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mut);background:var(--panel2);padding:6px 10px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+}
+
+/* ---------- panel: the core block ---------- */
+.panel{
+  background:var(--panel);
+  clip-path:polygon(0 0,calc(100% - var(--ch)) 0,100% var(--ch),100% 100%,var(--ch) 100%,0 calc(100% - var(--ch)));
+  margin-bottom:14px;
+}
+.panelHead{
+  display:flex;align-items:center;gap:10px;
+  background:var(--panel2);
+  padding:8px 16px;
+  min-height:38px;
+}
+.panelHead h2{
+  margin:0;flex:1;min-width:0;
+  font:700 14px/1 var(--font-disp);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);
+}
+.panel.me .panelHead{background:var(--blue)}
+.panel.me .panelHead h2{color:#fff}
+.panel.enemy .panelHead{background:var(--red)}
+.panel.enemy .panelHead h2{color:#fff}
+.panelBody{padding:13px 14px 14px}
+
+.counter{
+  font:700 11.5px/1 var(--font-disp);letter-spacing:.08em;
+  color:var(--dim);background:var(--bg);padding:4px 8px;flex:0 0 auto;
+}
+
+/* ---------- grid layouts ---------- */
+.grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.45fr) minmax(0,1fr);gap:14px;align-items:start}
+.stack{min-width:0}
+.setGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+
+/* ---------- hero block (your pick) ---------- */
+.heroBig{
+  display:grid;grid-template-columns:136px 1fr;
+  background:var(--panel2);
+  cursor:pointer;position:relative;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
+  transition:background .12s;
+}
+.heroBig:hover{background:#28324a}
+.heroArt{position:relative;overflow:hidden;background:var(--panel)}
+.heroArt .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.heroBigFallback{position:absolute;inset:0;display:grid;place-items:center}
+.heroBigFallback b{font:800 54px/1 var(--font-disp);color:#090c11}
+.heroBigX{
+  position:absolute;top:0;right:0;width:44px;height:44px;
+  display:grid;place-items:center;
+  background:var(--red);color:#fff;font-size:15px;line-height:1;
+  clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.heroBigMeta{padding:14px 16px 14px 15px;min-width:0}
+.roleChip{
+  display:inline-block;font:700 10px/1 var(--font-disp);letter-spacing:.11em;text-transform:uppercase;
+  color:#fff;background:var(--blue);padding:4px 8px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%);
+}
+.heroBigName{
+  font:800 34px/1 var(--font-disp);letter-spacing:.01em;text-transform:uppercase;
+  margin:9px 0 5px;overflow-wrap:anywhere;
+}
+.heroBigSub{font:700 11px/1.3 var(--font-disp);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+
+/* ---------- enemy lineup rows ---------- */
+.enemyRow{display:flex;align-items:flex-start;gap:14px;row-gap:10px;padding:8px 0 2px;flex-wrap:wrap}
+.enemyAv{
+  position:relative;display:grid;grid-template-columns:50px 44px;grid-template-rows:50px auto;
+  column-gap:8px;flex:0 0 auto;
+}
+.enemyAv .frame,.enemyAv .av{width:50px;height:50px}
+.enemyAv .frame{grid-column:1;grid-row:1}
+.enemyRow .x{
+  grid-column:2;grid-row:1;align-self:center;
+  width:44px;height:44px;display:grid;place-items:center;
+  background:var(--panel2);color:var(--dim);font-size:12px;line-height:1;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+  transition:background .12s,color .12s;
+}
+.enemyRow .x:hover{background:var(--red);color:#fff}
+.enemyAv .nm{
+  grid-column:1/-1;grid-row:2;margin-top:6px;
+  font:700 11px/1.2 var(--font-disp);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mut);overflow-wrap:anywhere;
+}
+.enemyAdd{
+  width:50px;height:50px;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--panel2);color:var(--dim);font:400 24px/1 var(--font-body);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  transition:background .12s,color .12s;
+}
+.enemyAdd:hover{background:var(--red);color:#fff}
+
+/* ---------- avatar: chamfered square, not a circle ---------- */
+.av{
+  position:relative;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%);
+}
+.av b{font:800 13px/1 var(--font-disp);color:#090c11;letter-spacing:.02em}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+
+/* ---------- item cards ---------- */
+.itemGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.itemCard{
+  background:var(--panel2);padding:11px 12px;min-width:0;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%);
+  border-left:2px solid transparent;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.itemCard.isCore{border-left-color:var(--gold)}
+.itemIc{position:relative;flex:0 0 auto;width:42px;height:42px}
+.itemIc img{
+  width:100%;height:100%;object-fit:cover;display:block;background:var(--panel);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+}
+.itemIc.noImg{width:auto;height:auto}
+.itemNum{
+  position:absolute;right:-5px;bottom:-5px;z-index:1;
+  font:700 10px/1 var(--font-disp);color:var(--bg);background:var(--gold);
+  padding:2px 5px;min-width:16px;text-align:center;
+}
+.itemIc.noImg .itemNum{position:static;display:inline-block}
+.itemBody{flex:1;min-width:0}
+.ic{font:700 10px/1 var(--font-disp);color:var(--bg);background:var(--gold);padding:2px 5px;flex:0 0 auto}
+.itemName{font:700 14px/1.2 var(--font-body);flex:1;min-width:0;overflow-wrap:anywhere}
+.itemMeta{font:700 10.5px/1.3 var(--font-disp);letter-spacing:.05em;color:var(--dim);margin-top:4px;text-transform:uppercase}
+.itemTags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{
+  font:700 9.5px/1 var(--font-disp);letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 6px;background:var(--panel);color:var(--blueTxt);
+}
+.tag.hot{background:var(--red);color:#fff}
+.tag.core{background:var(--gold);color:var(--bg)}
+
+/* ---------- build timeline ---------- */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tlRow{position:relative;display:flex;gap:8px;align-items:baseline;padding:6px 0}
+.tlIc{
+  position:absolute;left:-30px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;background:var(--panel);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);
+}
+.tlIc img{width:100%;height:100%;object-fit:cover;display:block}
+.tlIc.noImg{
+  width:12px;height:12px;left:-26px;background:var(--bg);
+  border:2px solid var(--blue);clip-path:none;
+}
+.tlName{font:700 13.5px/1.3 var(--font-body);flex:1;min-width:0}
+.tlTime{font:700 10.5px/1 var(--font-disp);letter-spacing:.06em;color:var(--dim);text-transform:uppercase;flex:0 0 auto}
+.tlGold{font:700 12px/1 var(--font-disp);color:var(--gold);flex:0 0 auto}
+.tlNote{font:400 12px/1.5 var(--font-body);color:var(--mut);margin-top:3px}
+
+/* ---------- rows (threats, counters) ---------- */
+.row{display:flex;gap:11px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.rowAv{flex:0 0 auto}
+.rowBody{flex:1;min-width:0}
+.rowHead{display:flex;align-items:baseline;gap:8px}
+.rowName{font:700 13.5px/1.2 var(--font-body);flex:1;min-width:0;overflow-wrap:anywhere}
+.rowNum{font:800 13px/1 var(--font-disp);color:var(--gold);flex:0 0 auto}
+.rowVal{font:700 11px/1 var(--font-disp);letter-spacing:.06em;color:var(--dim);text-transform:uppercase;flex:0 0 auto}
+.rowSub{font:400 12px/1.45 var(--font-body);color:var(--dim);margin-top:2px}
+.rowBar{height:3px;background:var(--bg);margin-top:7px;overflow:hidden}
+.rowBar i{display:block;height:100%;background:var(--blue)}
+
+/* ---------- swap row ---------- */
+.swapRow{display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.swapRow:last-child{border-bottom:0}
+.slot{flex:1;min-width:0;display:flex;gap:10px;align-items:center}
+.s{font:700 11px/1.3 var(--font-body);color:var(--mut)}
+
+/* ---------- tips + warning ---------- */
+.tips{list-style:none;margin:0;padding:0}
+.tips li{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--line)}
+.tips li:last-child{border-bottom:0}
+.bullet{color:var(--gold);flex:0 0 auto;font-size:11px;line-height:1.6}
+.tips b{font:700 12.5px/1.45 var(--font-body);color:var(--txt)}
+.tips .rowSub{margin-top:1px}
+.warn{
+  background:rgba(224,60,60,.10);border-left:2px solid var(--red);
+  padding:10px 12px;margin-bottom:12px;
+}
+.warn .tt{font:700 12.5px/1.4 var(--font-body);color:var(--redTxt)}
+.warn .dd{font:400 12px/1.5 var(--font-body);color:var(--mut);margin-top:3px}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  font:700 12px/1 var(--font-disp);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--txt);background:var(--panel2);
+  padding:11px 16px;min-height:44px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  transition:background .12s,color .12s;
+}
+.btn:hover{background:var(--panel);color:#fff}
+.btn.primary{background:var(--blue);color:#fff;box-shadow:3px 3px 0 rgba(9,12,17,.7)}
+.btn.primary:hover{background:#2f7aef}
+.btn:active,.navTab:active,.fBtn:active,.iconBtn:active,.heroBigX:active,.enemyRow .x:active,.enemyAdd:active,.gTile:active,.rosterTile:active{transform:translateY(1px)}
+button:disabled{cursor:not-allowed;opacity:.5}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- inputs ---------- */
+.field{margin-bottom:14px}
+.field label,.label{
+  display:block;font:700 10.5px/1 var(--font-disp);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:7px;
+}
+.searchWrap{position:relative;flex:1;min-width:0}
+.searchWrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--dim);pointer-events:none}
+.search{
+  width:100%;padding:11px 14px 11px 36px;
+  background:var(--bg);border:1px solid var(--edge);color:var(--txt);
+  outline:none;border-radius:0;
+}
+.input{
+  width:100%;padding:11px 12px;
+  background:var(--bg);border:1px solid var(--edge);color:var(--txt);
+  outline:none;border-radius:0;
+}
+.search:focus,.input:focus{border-color:var(--gold)}
+
+/* ---------- filters ---------- */
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.fBtn{
+  font:700 10.5px/1 var(--font-disp);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mut);background:var(--panel2);padding:9px 12px;min-height:44px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+  transition:background .12s,color .12s;
+}
+.fBtn:hover{color:var(--txt);background:var(--panel)}
+.fBtn.on{background:var(--gold);color:var(--bg)}
+
+/* ---------- roster ---------- */
+.rosterTop{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.rosterGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+.rosterTile{
+  background:var(--panel2);padding:10px 6px;text-align:center;min-width:0;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  transition:background .12s;
+}
+.rosterTile:hover{background:var(--panel)}
+.rosterTile .av{width:46px;height:46px;margin:0 auto 7px}
+.rosterTile .nm{font:700 12px/1.2 var(--font-body);overflow-wrap:anywhere}
+.rosterTile .rl{font:700 9px/1 var(--font-disp);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+
+/* ---------- picker ---------- */
+.picker{
+  position:fixed;inset:0;z-index:120;
+  background:rgba(9,12,17,.86);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.sheet{
+  width:min(860px,100%);max-height:88vh;display:flex;flex-direction:column;
+  background:var(--panel);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+}
+.sheetHead{display:flex;gap:10px;align-items:center;padding:13px 14px;background:var(--panel2)}
+.iconBtn{
+  width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--red);color:#fff;font-size:16px;line-height:1;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+}
+.heroGrid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+  gap:9px;padding:13px 14px;overflow-y:auto;flex:1;min-height:200px;
+}
+.gTile{
+  background:var(--panel2);padding:10px 6px;text-align:center;min-width:0;position:relative;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  transition:background .12s;
+}
+.gTile:hover{background:var(--panel)}
+.gTile.sel{background:var(--blue)}
+.gTile .av{width:44px;height:44px;margin:0 auto 7px}
+.gTile .nm{font:700 12px/1.2 var(--font-body);overflow-wrap:anywhere}
+.gTile .rl{font:700 9px/1 var(--font-disp);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+.sheetFoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:var(--panel2);font:700 11px/1 var(--font-disp);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+
+/* ---------- settings minis ---------- */
+.miniGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mini{background:var(--panel2);padding:11px 12px;min-width:0}
+.miniTop{display:flex;align-items:center;gap:8px}
+.miniIcon{
+  flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  background:var(--panel);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+  font:700 14px/1 var(--font-disp);color:var(--gold);
+}
+.miniIcon img{width:100%;height:100%;object-fit:cover;display:block}
+.miniLabel{font:700 9.5px/1 var(--font-disp);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.miniVal{font:800 20px/1.1 var(--font-disp);margin-top:3px}
+.miniSub{font:400 11.5px/1.4 var(--font-body);color:var(--dim);margin-top:2px}
+
+/* ---------- empty + status + hint ---------- */
+.empty{padding:26px 12px;text-align:center;color:var(--dim);font:400 13px/1.5 var(--font-body)}
+.empty .big{font-size:24px;margin-bottom:8px;opacity:.6}
+.status{font:700 11.5px/1.4 var(--font-disp);letter-spacing:.05em;margin-top:8px;min-height:16px}
+.status.ok{color:var(--ok)}
+.status.err{color:var(--redTxt)}
+.hint{font:400 12px/1.55 var(--font-body);color:var(--dim);margin:0}
+.s{font:700 11px/1.4 var(--font-body);color:var(--mut)}
+
+/* ---------- misc atoms ---------- */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.heroEmpty{
+  padding:26px 12px;text-align:center;color:var(--dim);
+  background:var(--panel2);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%);
+}
+.frame{display:block;width:100%}
+.plus{font:400 24px/1 var(--font-body)}
+.d{font:400 12px/1.5 var(--font-body);color:var(--mut)}
+
+/* ============================================================
+   RESPONSIVE: re-stack, do not shrink
+   ============================================================ */
+@media (max-width:1240px){
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .grid > .stack:last-child{grid-column:1/-1}
+  .bar{gap:14px}
+  .navTab{padding:11px 14px 11px 18px}
+}
+@media (max-width:880px){
+  .bar{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}
+  .barNav{order:3;width:100%;overflow-x:auto}
+  .navTab{flex:0 0 auto}
+  .barInfo{margin-left:auto}
+  .grid,.setGrid{grid-template-columns:minmax(0,1fr)}
+  .grid > .stack:last-child{grid-column:auto}
+  .itemGrid{grid-template-columns:1fr 1fr}
+  .heroBigName{font-size:29px}
+}
+@media (max-width:520px){
+  .stage{padding:12px 11px 22px}
+  .grid,.setGrid{gap:11px}
+  .itemGrid,.miniGrid{grid-template-columns:1fr}
+  .heroBig{grid-template-columns:104px 1fr}
+  .heroBigName{font-size:25px}
+  .rosterGrid,.heroGrid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+  .barNav{gap:4px}
+  .navTab{padding:11px 9px 11px 13px;font-size:11px;letter-spacing:.07em}
+  .brandSub{display:none}
+  .picker{padding:10px}
+  .sheet{max-height:92vh}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <div class="brandMark">CF</div>
+      <div>
+        <h1 class="brandName">Counter Forge</h1>
+        <div class="brandSub">MLBB counter engine</div>
+      </div>
+    </div>
+    <nav class="barNav">
+      <button class="navTab is-active" data-view="build">My Build</button>
+      <button class="navTab" data-view="draft">Counter Picks</button>
+      <button class="navTab" data-view="roster">Roster</button>
+      <button class="navTab" data-view="settings">Settings</button>
+    </nav>
+    <div class="barInfo">
+      <span class="chip" id="verTag">v1.2</span>
+      <span class="chip" id="rosterPill">0 heroes</span>
+    </div>
+  </header>
+
+  <main class="stage">
+    <!-- ================= MY BUILD ================= -->
+    <section class="view" id="view-build">
+      <div class="grid">
+        <div class="stack">
+          <div class="panel me">
+            <div class="panelHead"><h2>Your hero</h2></div>
+            <div class="panelBody" id="mySlot"></div>
+          </div>
+          <div class="panel enemy">
+            <div class="panelHead"><h2>Enemy lineup</h2>
+              <span class="counter" id="enemyCount">0 / 5</span></div>
+            <div class="panelBody" id="enemySlot"></div>
+          </div>
+          <div id="swapOut"></div>
+        </div>
+        <div class="stack" id="buildOut"></div>
+        <div class="stack" id="buildSide"></div>
+      </div>
+    </section>
+
+    <!-- ================= COUNTER PICKS ================= -->
+    <section class="view" id="view-draft" hidden>
+      <div class="grid">
+        <div class="stack">
+          <div class="panel enemy">
+            <div class="panelHead"><h2>Their lineup</h2>
+              <span class="counter" id="draftCount">0 / 5</span></div>
+            <div class="panelBody" id="draftSlot"></div>
+          </div>
+        </div>
+        <div class="stack" id="draftOut"></div>
+        <div class="stack" id="draftSide"></div>
+      </div>
+    </section>
+
+    <!-- ================= ROSTER ================= -->
+    <section class="view" id="view-roster" hidden>
+      <div class="panel">
+        <div class="panelHead"><h2>Full roster</h2>
+          <span class="counter" id="rosterCount">0</span></div>
+        <div class="panelBody">
+          <div class="rosterTop">
+            <div class="searchWrap">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+              <input class="search" id="rosterSearch" placeholder="Search heroes…" autocomplete="off" aria-label="Search heroes">
+            </div>
+            <div class="filters" id="rosterFilters"></div>
+          </div>
+          <div class="rosterGrid" id="rosterGrid"></div>
+          <p class="hint" style="margin:14px 0 0">Tap a hero to set them as your pick.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="view" id="view-settings" hidden>
+      <div class="setGrid">
+        <div class="panel">
+          <div class="panelHead"><h2>Live data sync</h2></div>
+          <div class="panelBody">
+            <div class="field">
+              <label for="dataUrl">Remote data URL</label>
+              <input class="input" id="dataUrl" placeholder="https://…/mlbb-data.json" autocomplete="off">
+              <div class="status" id="syncStatus"></div>
+            </div>
+            <div class="btnRow">
+              <button class="btn primary" id="btnSync">Sync now</button>
+              <button class="btn" id="btnExport">Export</button>
+              <button class="btn" id="btnImport">Import</button>
+            </div>
+            <input type="file" id="fileImport" accept="application/json" hidden>
+            <p class="hint" style="margin:12px 0 0">No official MLBB API exists. “Live” means a JSON file you host yourself. Export the dataset, edit it, host it, then paste the URL here. It loads automatically on the next open.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="panel">
+            <div class="panelHead"><h2>Dataset</h2></div>
+            <div class="panelBody">
+              <div class="miniGrid">
+                <div class="mini"><div class="miniLabel">Version</div><div class="miniVal" id="setVer">-</div></div>
+                <div class="mini"><div class="miniLabel">Heroes</div><div class="miniVal" id="setHeroes">0</div></div>
+                <div class="mini"><div class="miniLabel">Items</div><div class="miniVal" id="setItems">0</div></div>
+                <div class="mini"><div class="miniLabel">Spells</div><div class="miniVal" id="setSpells">0</div></div>
+              </div>
+              <div class="btnRow" style="margin-top:14px">
+                <button class="btn" id="btnReset">Clear selections</button>
+                <button class="btn" id="btnResetData">Restore built-in data</button>
+              </div>
+              <p class="hint" style="margin:12px 0 0">Everything is stored on this device. Nothing is uploaded anywhere.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= PICKER ================= -->
+<div class="picker" id="picker" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Pick a hero">
+    <div class="sheetHead">
+      <div class="searchWrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+        <input class="search" id="pickSearch" placeholder="Search hero…" autocomplete="off" aria-label="Search hero">
+      </div>
+      <button class="iconBtn" id="pickClose" aria-label="Close">✕</button>
+    </div>
+    <div class="filters" id="pickFilters"></div>
+    <div class="heroGrid" id="pickGrid"></div>
+    <div class="sheetFoot" id="pickFoot"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MLBB COUNTER FORGE
+   Single-file, offline-first, sync-capable.
+   ============================================================ */
+
+/* ---------- HERO DATA ----------
+   [id, name, role, lane, damage, threats, answers]
+   threats = what they do TO you (drives item scoring)
+   answers = what they are GOOD at beating (drives draft counter picks)
+------------------------------------------------------------- */
+const HEROES_RAW = [
+["tigreal","Tigreal","Tank","Roam","none","cc,aoe,zone","cc,aoe,mobility"],
+["franco","Franco","Tank","Roam","none","cc,pull,burst","pull,cc,mobility"],
+["akai","Akai","Tank","Roam","none","cc,zone,tank","mobility,cc,dps"],
+["minotaur","Minotaur","Tank","Roam","none","cc,aoe,antiheal","cc,aoe,burst"],
+["hylos","Hylos","Tank","Roam","magic","slow,tank,cc","mobility,dps,phys"],
+["belerick","Belerick","Tank","Roam","magic","cc,tank,antiheal","dps,phys,cc"],
+["grock","Grock","Tank","Roam","phys","cc,zone,tank","cc,zone,poke"],
+["khufra","Khufra","Tank","Roam","magic","cc,zone,mobility","mobility,burst,cc"],
+["baxia","Baxia","Tank","Roam","magic","antiheal,tank,aoe","antiheal,shield,regen"],
+["uranus","Uranus","Tank","Exp","magic","tank,regen,slow","dps,phys,poke"],
+["gatotkaca","Gatotkaca","Tank","Roam","magic","cc,aoe,tank","cc,aoe,magic"],
+["johnson","Johnson","Tank","Roam","magic","cc,burst,mobility","burst,cc,zone"],
+["lolita","Lolita","Tank","Roam","none","cc,shield,zone","poke,burst,cc"],
+["gloo","Gloo","Tank","Roam","none","cc,tank,zone","cc,mobility,dps"],
+["atlas","Atlas","Tank","Roam","magic","cc,aoe,zone","cc,aoe,mobility"],
+["edith","Edith","Tank","Roam","mixed","cc,burst,tank","cc,burst,phys"],
+["chip","Chip","Support","Roam","none","mobility,zone,cc","mobility,zone,cc"],
+["hilda","Hilda","Tank","Exp","phys","tank,burst,cc","burst,poke,phys"],
+["barats","Barats","Tank","Exp","phys","tank,cc,aoe","cc,tank,burst"],
+["masha","Masha","Fighter","Exp","phys","tank,dps,burst","tank,burst,phys"],
+["carmilla","Carmilla","Support","Roam","magic","cc,shield,tank","cc,burst,dps"],
+
+["chou","Chou","Fighter","Exp","phys","cc,mobility,burst","mobility,burst,cc"],
+["balmond","Balmond","Fighter","Exp","phys","tank,antiheal,aoe","tank,antiheal,dps"],
+["alucard","Alucard","Fighter","Exp","phys","dps,lifesteal,burst","dps,lifesteal,phys"],
+["zilong","Zilong","Fighter","Exp","phys","dps,mobility,burst","dps,mobility,phys"],
+["freya","Freya","Fighter","Exp","phys","dps,burst,shield","dps,burst,phys"],
+["ruby","Ruby","Fighter","Exp","phys","cc,antiheal,tank","cc,dps,phys"],
+["lapulapu","Lapu-Lapu","Fighter","Exp","phys","burst,cc,aoe","burst,cc,phys"],
+["argus","Argus","Fighter","Exp","phys","dps,immune,burst","dps,burst,phys"],
+["thamuz","Thamuz","Fighter","Exp","mixed","antiheal,tank,dps","antiheal,dps,phys"],
+["terizla","Terizla","Fighter","Exp","phys","cc,burst,aoe","burst,cc,phys"],
+["xborg","X.Borg","Fighter","Exp","mixed","trueDmg,aoe,poke","tank,trueDmg,phys"],
+["paquito","Paquito","Fighter","Exp","phys","burst,mobility,cc","mobility,burst,phys"],
+["phoveus","Phoveus","Fighter","Exp","magic","mobility,tank,cc","mobility,cc,burst"],
+["yuzhong","Yu Zhong","Fighter","Exp","magic","tank,antiheal,cc","antiheal,tank,phys"],
+["aulus","Aulus","Fighter","Exp","phys","dps,trueDmg,tank","dps,tank,phys"],
+["guinevere","Guinevere","Fighter","Exp","magic","burst,mobility,aoe","burst,mobility,magic"],
+["yin","Yin","Fighter","Exp","phys","burst,cc,mobility","burst,mobility,phys"],
+["julian","Julian","Fighter","Exp","magic","burst,mobility,aoe","burst,mobility,magic"],
+["arlott","Arlott","Fighter","Exp","phys","cc,mobility,burst","mobility,cc,burst"],
+["leomord","Leomord","Fighter","Exp","phys","burst,mobility,tank","burst,mobility,phys"],
+["dyrroth","Dyrroth","Fighter","Exp","phys","trueDmg,burst,antiheal","trueDmg,burst,phys"],
+["alpha","Alpha","Fighter","Exp","phys","dps,trueDmg,cc","dps,trueDmg,phys"],
+["bane","Bane","Fighter","Exp","mixed","poke,aoe,tank","poke,aoe,magic"],
+["jawhead","Jawhead","Fighter","Exp","phys","cc,burst,tank","cc,burst,phys"],
+["roger","Roger","Fighter","Jungle","phys","dps,burst,mobility","dps,burst,phys"],
+["silvanna","Silvanna","Fighter","Exp","magic","cc,burst,zone","cc,burst,magic"],
+["minsitthar","Minsitthar","Fighter","Exp","phys","cc,zone,aoe","mobility,cc,zone"],
+["khaleed","Khaleed","Fighter","Exp","phys","tank,cc,aoe","cc,tank,phys"],
+["sun","Sun","Fighter","Exp","phys","summon,dps,tank","summon,dps,phys"],
+["badang","Badang","Fighter","Exp","phys","cc,burst,dps","cc,burst,phys"],
+["fredrinn","Fredrinn","Fighter","Exp","phys","tank,burst,cc","burst,cc,tank"],
+
+["fanny","Fanny","Assassin","Jungle","phys","mobility,burst,snowball","poke,zone,slow"],
+["lancelot","Lancelot","Assassin","Jungle","phys","burst,mobility,dps","poke,dps,slow"],
+["hayabusa","Hayabusa","Assassin","Jungle","phys","burst,mobility,stealth","poke,dps,slow"],
+["gusion","Gusion","Assassin","Jungle","magic","burst,mobility,aoe","poke,dps,burst"],
+["helcurt","Helcurt","Assassin","Jungle","phys","burst,stealth,cc","poke,magic,slow"],
+["selena","Selena","Assassin","Jungle","magic","burst,cc,magic","poke,zone,slow"],
+["natalia","Natalia","Assassin","Jungle","phys","stealth,burst,cc","poke,magic,dps"],
+["karina","Karina","Assassin","Jungle","magic","burst,execute,mobility","poke,dps,shield"],
+["saber","Saber","Assassin","Jungle","phys","burst,cc,execute","mobility,burst,poke"],
+["hanzo","Hanzo","Assassin","Jungle","phys","burst,poke,stealth","poke,dps,slow"],
+["ling","Ling","Assassin","Jungle","phys","mobility,burst,dps","poke,zone,slow"],
+["benedetta","Benedetta","Assassin","Exp","phys","mobility,burst,cc","poke,cc,slow"],
+["aamon","Aamon","Assassin","Jungle","magic","burst,stealth,mobility","poke,dps,slow"],
+["joy","Joy","Assassin","Jungle","magic","mobility,burst,cc","poke,cc,slow"],
+["nolan","Nolan","Assassin","Jungle","phys","mobility,burst,cc","poke,cc,slow"],
+["suyou","Suyou","Assassin","Jungle","phys","burst,mobility,cc","poke,cc,slow"],
+["harley","Harley","Assassin","Jungle","magic","burst,mobility,magic","poke,dps,slow"],
+["lesley","Lesley","Marksman","Gold","phys","poke,burst,stealth","dps,burst,slow"],
+["yisunshin","Yi Sun-shin","Marksman","Gold","phys","poke,dps,zone","dps,poke,slow"],
+
+["kagura","Kagura","Mage","Mid","magic","burst,mobility,aoe","poke,mobility,slow"],
+["eudora","Eudora","Mage","Mid","magic","burst,cc,poke","poke,burst,slow"],
+["nana","Nana","Mage","Mid","magic","cc,poke,aoe","poke,cc,slow"],
+["vale","Vale","Mage","Mid","magic","burst,cc,aoe","poke,burst,slow"],
+["valir","Valir","Mage","Mid","magic","poke,aoe,cc","poke,cc,slow"],
+["lunox","Lunox","Mage","Mid","magic","burst,magic,immune","poke,burst,slow"],
+["pharsa","Pharsa","Mage","Mid","magic","poke,aoe,burst","poke,burst,slow"],
+["aurora","Aurora","Mage","Mid","magic","cc,burst,poke","poke,burst,slow"],
+["cecilion","Cecilion","Mage","Mid","magic","poke,burst,magic","poke,burst,slow"],
+["change","Chang'e","Mage","Mid","magic","poke,aoe,mobility","poke,dps,slow"],
+["harith","Harith","Mage","Mid","magic","mobility,dps,magic","poke,dps,slow"],
+["lylia","Lylia","Mage","Mid","magic","poke,aoe,mobility","poke,burst,slow"],
+["yve","Yve","Mage","Mid","magic","poke,zone,aoe","poke,zone,slow"],
+["luoyi","Luo Yi","Mage","Mid","magic","poke,aoe,cc","poke,cc,slow"],
+["xavier","Xavier","Mage","Mid","magic","poke,burst,zone","poke,burst,slow"],
+["zhask","Zhask","Mage","Mid","magic","summon,poke,aoe","summon,poke,slow"],
+["valentina","Valentina","Mage","Mid","magic","burst,cc,mobility","poke,burst,slow"],
+["novaria","Novaria","Mage","Mid","magic","poke,zone,mobility","poke,zone,slow"],
+["kadita","Kadita","Mage","Mid","magic","burst,cc,mobility","poke,burst,slow"],
+["gord","Gord","Mage","Mid","magic","poke,aoe,burst","poke,burst,slow"],
+["alice","Alice","Mage","Exp","magic","tank,antiheal,aoe","antiheal,tank,magic"],
+["esmeralda","Esmeralda","Mage","Exp","magic","shield,antiheal,tank","antiheal,shield,trueDmg"],
+["faramis","Faramis","Support","Roam","magic","summon,revive,aoe","aoe,summon,burst"],
+["vexana","Vexana","Mage","Mid","magic","summon,poke,aoe","summon,poke,slow"],
+["zhuxin","Zhuxin","Mage","Mid","magic","cc,poke,aoe","poke,cc,slow"],
+["lukas","Lukas","Mage","Exp","magic","burst,mobility,tank","burst,mobility,magic"],
+
+["miya","Miya","Marksman","Gold","phys","dps,poke,slow","tank,dps,zone"],
+["layla","Layla","Marksman","Gold","phys","poke,dps","tank,dps,zone"],
+["clint","Clint","Marksman","Gold","phys","burst,poke,dps","tank,dps,zone"],
+["bruno","Bruno","Marksman","Gold","phys","burst,dps","tank,dps,zone"],
+["moskov","Moskov","Marksman","Gold","phys","dps,poke,slow","tank,dps,zone"],
+["karrie","Karrie","Marksman","Gold","phys","trueDmg,dps,tank","tank,shield,dps"],
+["irithel","Irithel","Marksman","Gold","phys","dps,mobility","tank,dps,zone"],
+["hanabi","Hanabi","Marksman","Gold","phys","dps,aoe,cc","tank,dps,zone"],
+["claude","Claude","Marksman","Gold","phys","dps,mobility,aoe","tank,dps,zone"],
+["kimmy","Kimmy","Marksman","Gold","magic","poke,dps,aoe","tank,poke,zone"],
+["granger","Granger","Marksman","Gold","phys","burst,dps,poke","tank,dps,zone"],
+["wanwan","Wanwan","Marksman","Gold","phys","dps,mobility,trueDmg","tank,cc,zone"],
+["brody","Brody","Marksman","Gold","phys","burst,poke,cc","tank,dps,zone"],
+["beatrix","Beatrix","Marksman","Gold","phys","burst,poke,dps","tank,dps,zone"],
+["melissa","Melissa","Marksman","Gold","phys","dps,cc,zone","tank,dps,zone"],
+["natan","Natan","Marksman","Gold","magic","dps,mobility,poke","tank,dps,zone"],
+["ixia","Ixia","Marksman","Gold","phys","dps,aoe,slow","tank,dps,zone"],
+["popol","Popol and Kupa","Marksman","Gold","phys","summon,cc,dps","tank,dps,zone"],
+
+["angela","Angela","Support","Roam","magic","shield,cc,regen","burst,dps,cc"],
+["estes","Estes","Support","Roam","magic","regen,aoe,slow","dps,burst,cc"],
+["rafaela","Rafaela","Support","Roam","magic","regen,poke,cc","burst,dps,cc"],
+["diggie","Diggie","Support","Roam","magic","cc,antiheal,zone","cc,zone,burst"],
+["mathilda","Mathilda","Support","Roam","magic","mobility,shield,cc","burst,dps,cc"],
+["floryn","Floryn","Support","Roam","magic","regen,shield,cc","burst,dps,cc"],
+
+/* --- additions: 2025–2026 roster sync (tags derived from wiki ability text) --- */
+["aldous","Aldous","Fighter","Exp","phys","burst,tank,dps","poke,zone"],
+["cici","Cici","Fighter","Exp","phys","dps,mobility,regen","dps,zone"],
+["sora","Sora","Fighter","Exp","phys","burst,mobility,cc","mobility,burst,phys"],
+["martis","Martis","Fighter","Jungle","phys","burst,cc,execute","burst,cc,phys"],
+["hirara","Hirara","Assassin","Jungle","phys","mobility,burst,execute","poke,zone,slow"],
+["kaja","Kaja","Support","Roam","magic","cc,pull,mobility","cc,pull,mobility"],
+["kalea","Kalea","Support","Roam","phys","cc,regen,tank","cc,dps,phys"],
+["marcel","Marcel","Support","Roam","phys","cc,aoe,zone","cc,zone,dps"],
+["obsidia","Obsidia","Marksman","Gold","phys","dps,poke,execute","tank,dps,zone"],
+["cyclops","Cyclops","Mage","Mid","magic","poke,cc,burst","poke,burst,slow"],
+["odette","Odette","Mage","Mid","magic","burst,aoe,poke","poke,burst,slow"],
+["zetian","Zetian","Mage","Mid","magic","poke,cc,aoe","poke,cc,slow"]
+];
+
+/* ---------- ITEM DATA ----------
+   [id, name, cost, kind, answers, stats, why]
+------------------------------------------------------------- */
+const ITEMS_RAW = [
+["heptaseas","Blade of the Heptaseas",1950,"phys","burst,poke","+70 Phys ATK · +250 HP · 15% CDR","Ambush burst that punishes squishy backline."],
+["malefic","Malefic Roar",2060,"phys","tank,shield","+60 Phys ATK · +35% Phys PEN","Percent pen shreds high-armor tanks."],
+["berserker","Berserker's Fury",2350,"phys","dps","+65 Phys ATK · +25% Crit","Crit spike for sustained auto damage."],
+["scarlet","Scarlet Phantom",2000,"phys","dps","+30 Phys ATK · +35% Atk Spd · +25% Crit","Attack speed to out-DPS auto attackers."],
+["endless","Endless Battle",2470,"phys","trueDmg,dps","+65 Phys ATK · +250 HP · 15% Lifesteal","True damage on hit plus sustain in long fights."],
+["haas","Haas' Claws",1800,"phys","lifesteal,dps","+50 Phys ATK · +25% Lifesteal","Sustain to win extended trades."],
+["despair","Blade of Despair",3010,"phys","burst,execute","+160 Phys ATK","Huge flat ATK, deletes low-HP targets."],
+["dhs","Demon Hunter Sword",2180,"phys","tank,shield,summon","+35 Phys ATK · +25% Atk Spd","Current-HP damage melts tanks and summons."],
+["corrosion","Corrosion Scythe",2050,"phys","dps,slow","+35 Phys ATK · +25% Atk Spd","Slows and shreds attack speed: anti-marksman."],
+["windtalker","Windtalker",1900,"phys","aoe,dps","+20 Phys ATK · +40% Atk Spd · +20% Crit","Chain lightning clears waves and summons."],
+["seahalberd","Sea Halberd",2100,"phys","antiheal,shield,regen,lifesteal","+70 Phys ATK · +15% Atk Spd","Anti-heal plus anti-shield. The physical sustain answer."],
+["waraxe","War Axe",2000,"phys","dps,trueDmg","+45 Phys ATK · +550 HP","Stacks true damage the longer you fight."],
+["skypiercer","Sky Piercer",2300,"phys","execute,burst","+60 Phys ATK","Executes low-HP targets, so finish the job."],
+["goldenstaff","Golden Staff",2000,"phys","dps,shield","+20 Phys ATK · +25% Atk Spd","Turns crit into raw attack speed: anti-shield."],
+
+["genius","Genius Wand",2000,"magic","magic,burst","+75 Magic Power · +10% Magic PEN","Penetration for early magic burst."],
+["divine","Divine Glaive",2050,"magic","tank,magic","+70 Magic Power · +40% Magic PEN","Percent pen vs magic-resist tanks."],
+["holycrystal","Holy Crystal",3000,"magic","burst","+100 Magic Power","Biggest raw magic spike in the game."],
+["bloodwings","Blood Wings",2900,"magic","burst,tank","+150 Magic Power · +500 HP","Magic power plus a shield, so it survives burst."],
+["enchanted","Enchanted Talisman",1900,"magic","poke","+50 Magic Power · 20% CDR · Mana regen","Spam abilities for more poke and CC uptime."],
+["clock","Clock of Destiny",2000,"magic","tank,burst","+60 Magic Power · HP stacking","Scales into a durable late-game mage."],
+["truncheon","Lightning Truncheon",2100,"magic","burst,aoe","+75 Magic Power · Mana","Chain burst damage on ability casts."],
+["glowing","Glowing Wand",2000,"magic","antiheal,poke,regen","+75 Magic Power · +5% Move Spd","Burn damage that also chips healing."],
+["necklace","Necklace of Durance",2200,"magic","antiheal,regen,lifesteal,shield","+70 Magic Power · 15% CDR","Anti-heal for mages. Mandatory vs sustain comps."],
+["concentrated","Concentrated Energy",2000,"magic","lifesteal,dps","+70 Magic Power · +HP · Lifesteal","Sustain so you can trade and stay in lane."],
+["winter","Winter Truncheon",1900,"magic","burst,execute,immune","+60 Magic Power · +Armor","Freeze yourself through their burst combo."],
+["icequeen","Ice Queen Wand",2000,"magic","slow,mobility","+75 Magic Power · +Move Spd","Slows on hit, which shuts down divers."],
+["feather","Feather of Heaven",2000,"magic","dps,poke","+Magic Power · +Atk Spd","Hybrid scaling for basic-attack mages."],
+["fleeting","Fleeting Time",2000,"magic","burst","+Magic Power · 15% CDR","Ult cooldown resets on takedown."],
+
+["antique","Antique Cuirass",2150,"def","phys,dps","+920 HP · +54 Phys DEF","Reduces enemy physical ATK on hit: anti-bruiser."],
+["athena","Athena's Shield",2150,"def","magic,burst","+900 HP · +56 Magic DEF","Shield that eats a magic burst combo."],
+["radiant","Radiant Armor",2100,"def","magic,dps","+950 HP · +52 Magic DEF","Stacks magic reduction vs sustained magic DPS."],
+["dominance","Dominance Ice",2200,"def","antiheal,regen,dps,lifesteal,shield","+500 HP · +Armor · +Mana","Aura anti-heal plus attack-speed slow. Best anti-sustain item."],
+["bladearmor","Blade Armor",2100,"def","phys,dps","+70 Phys DEF","Reflects damage back at auto attackers."],
+["oracle","Oracle",2100,"def","antiheal,magic,regen","+850 HP · +Magic DEF · +CDR","Boosts your own healing, resists magic."],
+["cursed","Cursed Helmet",2000,"def","tank,summon,aoe","+920 HP · +Magic DEF","Burns nearby enemies, clearing summons."],
+["twilight","Twilight Armor",2200,"def","burst,phys,execute","+950 HP · +Phys DEF","Caps incoming burst damage: anti-one-shot."],
+["guardian","Guardian Helmet",2100,"def","poke,sustain","+1550 HP · HP regen","Massive HP regen to shrug off poke."],
+["immortality","Immortality",2100,"def","burst,execute,revive","+800 HP · +Phys DEF","Revive once to bait their full combo."],
+["bruteforce","Brute Force Breastplate",2000,"def","phys,tank","+770 HP · +Armor","Stacks armor and movement in fights."],
+["thunderbelt","Thunder Belt",2000,"def","slow,mobility,phys","+HP · +Armor · +Mana","Slows on basic attack, locking down divers."],
+["skyguardian","Sky Guardian Helmet",2500,"def","poke,regen","+1550 HP · Regen","Out-sustain poke comps."],
+
+["warrior","Warrior Boots",720,"boot","phys,dps","+22 Phys DEF","Armor boots vs physical lanes."],
+["tough","Tough Boots",720,"boot","cc,magic","+22 Magic DEF · CC reduction","CC reduction: the anti-lockdown boot."],
+["arcane","Arcane Boots",720,"boot","magic,burst","+Magic PEN","Magic pen for early burst."],
+["swift","Swift Boots",720,"boot","dps","+Atk Spd","Attack speed for marksman DPS."],
+["magicshoes","Magic Shoes",720,"boot","poke","+10% CDR","Cooldown boots for ability spam."],
+["demon","Demon Shoes",720,"boot","poke","+Mana regen","Mana boots for sustained poke."],
+["rapid","Rapid Boots",720,"boot","mobility,slow","+Move Spd","Movement boots to dodge skillshots."],
+
+["conceal","Conceal",1200,"roam","stealth,burst","Team invisibility","Engage or escape tool for the roam."],
+["encourage","Encourage",1200,"roam","dps","Team ATK buff","Buff your carry's damage."],
+["direhit","Dire Hit",1200,"roam","burst","Team damage amp","Amp burst for picks."],
+["favor","Favor",1200,"roam","burst,regen","Team shield + regen","Protects against burst."],
+["avarice","Avarice",1200,"roam","poke","Gold generation","Economy for late scaling."],
+["pulling","Pull Yourself Together",1200,"roam","cc,burst","CDR for team","Faster ults against CC comps."]
+];
+
+/* ---------- SPELLS ---------- [id, name, answers, why] */
+const SPELLS_RAW = [
+["purify","Purify","cc,pull,slow","Removes CC and grants brief immunity."],
+["flicker","Flicker","burst,mobility,zone","Instant blink to dodge or engage."],
+["aegis","Aegis","burst,execute,poke","Shield that absorbs a burst combo."],
+["sprint","Sprint","slow,mobility","Burst of speed that ignores slows."],
+["retribution","Retribution","jungle","Jungle clear and objective secure."],
+["execute","Execute","execute,shield,immune","True damage finisher."],
+["inspire","Inspire","dps,tank","Attack speed and penetration burst."],
+["vengeance","Vengeance","dps,burst","Reflects a portion of damage taken."],
+["petrify","Petrify","mobility,dps","AoE stun to lock down divers."],
+["arrival","Arrival","zone,poke","Teleport to a turret or minion."],
+["heal","Heal","poke,sustain","Heal and movement for you and allies."]
+];
+
+/* ---------- EMBLEMS ---------- */
+const EMBLEMS = {
+  Tank:     {set:"Tank",     t1:"Vitality",           t2:"Tenacity",            t3:"Brave Smite"},
+  Fighter:  {set:"Fighter",  t1:"Firmness",           t2:"Festival of Blood",   t3:"Brave Smite"},
+  Assassin: {set:"Assassin", t1:"Agility",            t2:"Weapon Master",       t3:"Killing Spree"},
+  Mage:     {set:"Mage",     t1:"Agility",            t2:"Obsidian Shard",      t3:"Impure Rage"},
+  Marksman: {set:"Marksman", t1:"Swift",              t2:"Weapon Master",       t3:"Weakness Finder"},
+  Support:  {set:"Support",  t1:"Agility",            t2:"Pull Yourself Together", t3:"Quantum Charge"}
+};
+
+/* ---------- THREAT TAG LIBRARY ---------- */
+const TAG = {
+  antiheal:{label:"Sustain",       w:1.35, tip:"Build anti-heal BEFORE their sustain snowballs. Sea Halberd (physical) or Necklace of Durance (magic)."},
+  cc:      {label:"Hard CC",       w:1.20, tip:"Respect their CC range. Tough Boots plus Purify if you keep getting locked down, and never clump for AoE CC."},
+  burst:   {label:"Burst",         w:1.18, tip:"They kill you in one combo. Buy HP or a shield item and never walk into them alone."},
+  trueDmg: {label:"True damage",   w:1.20, tip:"Resistances do nothing against true damage. Stack raw HP instead of armor."},
+  mobility:{label:"Mobility",      w:1.12, tip:"They close distance fast. Hold a dash or Flicker and fight near your tower, not in the open."},
+  shield:  {label:"Shields",       w:1.12, tip:"Shields eat your damage. Take anti-shield (Sea Halberd, Demon Hunter Sword) or burst straight through them."},
+  snowball:{label:"Snowball",      w:1.15, tip:"They snowball early. Play safe, keep vision, and do not gift them a single kill."},
+  pull:    {label:"Hooks/Pulls",   w:1.10, tip:"One hook is death. Take Purify and never face-check brush against them."},
+  execute: {label:"Execute",       w:1.10, tip:"They finish low-HP targets, so keep HP high and consider Immortality."},
+  lifesteal:{label:"Lifesteal",    w:1.10, tip:"Anti-heal switches their sustain off completely. Do not trade into them without it."},
+  regen:   {label:"Regen",         w:1.10, tip:"Anti-heal is the only answer, or they simply heal through your damage."},
+  stealth: {label:"Stealth",       w:1.05, tip:"Watch for the invisible engage. Play near vision and do not farm alone."},
+  magic:   {label:"Magic damage",  w:1.00, tip:"Magic resist pays off fast here. Athena's Shield or Radiant Armor."},
+  phys:    {label:"Physical damage",w:1.00, tip:"Armor cuts their damage hard. Antique Cuirass or Blade Armor."},
+  dps:     {label:"Sustained DPS", w:1.00, tip:"They win long fights. Burst them, or build attack-speed slows (Dominance Ice, Corrosion Scythe)."},
+  tank:    {label:"Tanky",         w:1.00, tip:"Percent penetration (Malefic Roar, Divine Glaive) or true damage to cut through their HP."},
+  immune:  {label:"Immunity",      w:1.00, tip:"Bait their immunity window, then commit your damage the moment it drops."},
+  revive:  {label:"Revive",        w:1.00, tip:"They come back once, so save a burst or execute for the second life."},
+  poke:    {label:"Poke",          w:0.95, tip:"They chip you from range. Sustain items, and do not stand in the open."},
+  aoe:     {label:"AoE",           w:0.95, tip:"Spread out. Clumping together feeds their area damage."},
+  summon:  {label:"Summons",       w:0.90, tip:"AoE items (Cursed Helmet, Windtalker) clear pets and turrets quickly."},
+  zone:    {label:"Zone control",  w:0.90, tip:"They control space. Fight outside their zone or make them commit to it."},
+  slow:    {label:"Slows",         w:0.85, tip:"Slows ruin positioning. Take Rapid Boots, Sprint, or Purify."}
+};
+
+const ROLE_COLOR = {Tank:"#3b82f6",Fighter:"#f97316",Assassin:"#ef4444",Mage:"#a855f7",Marksman:"#22c55e",Support:"#14b8a6"};
+const ROLE_W = {Assassin:1.15,Marksman:1.15,Mage:1.05,Fighter:1.0,Tank:0.92,Support:0.85};
+/* rough role matchup: who naturally beats whom in lane / teamfights */
+const ROLE_BEATS = {
+  Assassin:["Marksman","Mage","Support"],
+  Fighter: ["Marksman","Mage"],
+  Marksman:["Tank"],
+  Mage:    ["Fighter","Tank"],
+  Tank:    ["Assassin"],
+  Support: []
+};
+const BUDGET = {
+  Marksman:{def:2,off:5}, Mage:{def:2,off:5}, Assassin:{def:1,off:5},
+  Fighter:{def:3,off:4}, Tank:{def:5,off:1}, Support:{def:4,off:1}
+};
+
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+let DB = null;
+
+function splitCSV(s){ return String(s||"").split(",").map(x=>x.trim()).filter(Boolean); }
+
+function normalize(raw){
+  const heroes = (raw.heroes||[]).map(r=>({
+    id:r[0], name:r[1], role:r[2], lane:r[3], dmg:r[4],
+    threats:splitCSV(r[5]), answers:splitCSV(r[6])
+  }));
+  const items = (raw.items||[]).map(r=>({
+    id:r[0], name:r[1], cost:r[2], kind:r[3],
+    answers:splitCSV(r[4]), stats:r[5], why:r[6]
+  }));
+  const spells = (raw.spells||[]).map(r=>({
+    id:r[0], name:r[1], answers:splitCSV(r[2]), why:r[3]
+  }));
+  const byId = {};
+  heroes.forEach(h=>byId[h.id]=h);
+  return {version: raw.version||"custom", heroes, items, spells, byId};
+}
+
+const BUILTIN = {version:"1.2 · 133 heroes", heroes:HEROES_RAW, items:ITEMS_RAW, spells:SPELLS_RAW};
+
+function loadData(){
+  let raw = BUILTIN;
+  try{
+    const saved = localStorage.getItem("mlbbcf:data");
+    if(saved){
+      const p = JSON.parse(saved);
+      if(p && Array.isArray(p.heroes) && p.heroes.length>10) raw = p;
+    }
+  }catch(e){}
+  DB = normalize(raw);
+  return DB;
+}
+
+function saveData(raw){
+  try{ localStorage.setItem("mlbbcf:data", JSON.stringify(raw)); }catch(e){}
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = { me:null, enemies:[], draftEnemies:[] };
+
+function loadState(){
+  try{
+    const s = JSON.parse(localStorage.getItem("mlbbcf:state")||"null");
+    if(s){
+      state.me = s.me||null;
+      state.enemies = Array.isArray(s.enemies)?s.enemies:[];
+      state.draftEnemies = Array.isArray(s.draftEnemies)?s.draftEnemies:[];
+    }
+  }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem("mlbbcf:state", JSON.stringify(state)); }catch(e){}
+}
+
+/* ============================================================
+   ENGINE: item build
+   ============================================================ */
+function buildTagAgg(enemies){
+  const agg = {};
+  enemies.forEach(h=>{
+    h.threats.forEach(t=>{
+      if(!TAG[t]) return;
+      if(!agg[t]) agg[t] = {tag:t, count:0, w:0, heroes:[]};
+      agg[t].count++; agg[t].w += TAG[t].w; agg[t].heroes.push(h.name);
+    });
+  });
+  return agg;
+}
+
+function fitMultiplier(item, me){
+  const dmg = me.dmg;
+  const canCarry = me.role==="Mage"||me.role==="Marksman"||me.role==="Assassin"||me.role==="Fighter";
+  const caster = me.role==="Mage"||me.role==="Support";
+  if(item.kind==="boot"){
+    if(item.id==="arcane") return (canCarry && dmg==="magic")?1:0.08;
+    if(item.id==="swift")  return (canCarry && dmg==="phys")?1:(dmg==="mixed"?0.6:0.08);
+    if(item.id==="magicshoes") return caster?1:0.25;
+    if(item.id==="demon")      return caster?1:0.25;
+    return 1;
+  }
+  if(item.kind==="phys") return dmg==="phys"?1:(dmg==="mixed"?0.75:0.08);
+  if(item.kind==="magic") return dmg==="magic"?1:(dmg==="mixed"?0.75:0.08);
+  if(item.kind==="def") return (me.role==="Tank"||me.role==="Fighter"||me.role==="Support")?1:0.8;
+  if(item.kind==="roam") return (me.role==="Support"||me.role==="Tank")?1:0.25;
+  return 1;
+}
+
+/* archetype staples: stop a marksman building pure burst just because the
+   enemy team happens to be tagged "burst" */
+const CORE = {
+  Marksman:["scarlet","berserker","windtalker","goldenstaff","haas","dhs","despair","corrosion"],
+  Mage:     ["holycrystal","genius","divine","truncheon","clock","bloodwings"],
+  Assassin: ["heptaseas","despair","skypiercer","waraxe","endless"],
+  Fighter:  ["waraxe","endless","bruteforce","haas","bloodwings"],
+  Tank:     ["antique","athena","dominance","immortality","bruteforce"],
+  Support:  ["oracle","athena","favor","conceal","dominance"]
+};
+
+function scoreItems(agg, me){
+  const core = CORE[me.role] || [];
+  return DB.items.map(item=>{
+    let raw = 0;
+    const matched = [];
+    item.answers.forEach(a=>{
+      if(agg[a]){ raw += agg[a].w; matched.push(a); }
+    });
+    const fit = fitMultiplier(item, me);
+    const coreBonus = core.includes(item.id) ? 1.5 : 0;
+    return {item, score:(raw+coreBonus)*fit, matched, fit, raw};
+  });
+}
+
+function pickBuild(agg, me){
+  const scored = scoreItems(agg, me);
+  const budget = BUDGET[me.role] || {def:2,off:4};
+  const chosen = [];
+  const cover = {};
+  const bump = s=>s.matched.forEach(t=>{ cover[t]=(cover[t]||0)+1; });
+
+  let defCount=0, offCount=0, roamCount=0, antihealPicked=false;
+
+  // 1. Boots: exactly one, always
+  const boot = scored.filter(s=>s.item.kind==="boot").sort((a,b)=>b.score-a.score)[0];
+  if(boot){ chosen.push(boot); bump(boot); }
+
+  // 2. Anti-heal is non-negotiable when sustain is on the enemy team
+  if(agg.antiheal || agg.regen || agg.lifesteal){
+    const pool = scored.filter(s=>s.item.answers.includes("antiheal") && s.item.kind!=="boot");
+    const want = me.dmg==="magic" ? ["magic"] : me.dmg==="phys" ? ["phys"] : ["def"];
+    const anti = pool.filter(s=>want.includes(s.item.kind)).sort((a,b)=>b.raw-a.raw)[0]
+              || pool.slice().sort((a,b)=>b.raw-a.raw)[0];
+    if(anti){
+      chosen.push(anti); bump(anti); antihealPicked = true;
+      if(anti.item.kind==="def") defCount++;
+      else if(anti.item.kind==="phys"||anti.item.kind==="magic") offCount++;
+      else if(anti.item.kind==="roam"){ roamCount++; defCount++; }
+    }
+  }
+
+  const avail = scored.filter(s=>
+    s.item.kind!=="boot" && !chosen.includes(s) &&
+    !(antihealPicked && s.item.answers.includes("antiheal"))
+  );
+
+  // 3. Greedy fill with diminishing returns, so builds stay varied
+  //    (two anti-burst items is useful, five is not)
+  for(let guard=0; guard<40 && chosen.length<6; guard++){
+    let best=null, bestEff=-1;
+    for(const s of avail){
+      if(chosen.includes(s)) continue;
+      const k = s.item.kind;
+      if(k==="roam" && roamCount>=1) continue;      // only one roam item, ever
+      const isDef = (k==="def"||k==="roam");
+      const isOff = (k==="phys"||k==="magic");
+      if(isDef && defCount>=budget.def) continue;
+      if(isOff && offCount>=budget.off) continue;
+      let overlap=0;
+      s.matched.forEach(t=>{ overlap += (cover[t]||0); });
+      const eff = s.score / (1 + 0.5*overlap);
+      if(eff > bestEff){ bestEff=eff; best=s; }
+    }
+    if(!best) break;
+    chosen.push(best); bump(best);
+    const k = best.item.kind;
+    if(k==="roam"){ roamCount++; defCount++; }
+    else if(k==="def") defCount++;
+    else if(k==="phys"||k==="magic") offCount++;
+  }
+
+  // 4. Safety net if a budget was too tight
+  if(chosen.length<6){
+    for(const s of avail){
+      if(chosen.length>=6) break;
+      if(chosen.includes(s)) continue;
+      if(s.item.kind==="roam" && roamCount>=1) continue;
+      chosen.push(s);
+      if(s.item.kind==="roam"){ roamCount++; }
+    }
+  }
+
+  // 5. Order: boots first, then anti-heal (timing matters), then cheapest-first
+  const rank = s => s.item.kind==="boot" ? 0 : (s.item.answers.includes("antiheal") ? 1 : 2);
+  return chosen.slice().sort((a,b)=>{
+    const ra = rank(a), rb = rank(b);
+    if(ra!==rb) return ra-rb;
+    return a.item.cost-b.item.cost;
+  });
+}
+
+function phaseFor(cost){
+  if(cost<1000) return "First";
+  if(cost<2100) return "Early";
+  if(cost<2600) return "Mid";
+  return "Late";
+}
+
+/* ============================================================
+   BUILD TIMING
+   Cumulative gold -> clock time, using a typical farming curve.
+   Pace multiplier adjusts for how fast each lane actually earns.
+   ============================================================ */
+const GOLD_CURVE = [[0,0],[2,900],[4,2100],[6,3400],[8,4700],[10,6100],[12,7600],[15,9800],[18,12000],[22,15000]];
+const LANE_PACE = {Jungle:1.12, Gold:1.0, Mid:1.0, Exp:0.95, Roam:0.82};
+
+function minuteForGold(gold){
+  const c = GOLD_CURVE;
+  if(gold<=0) return 0;
+  for(let i=1;i<c.length;i++){
+    if(gold<=c[i][1]){
+      const m0=c[i-1][0], g0=c[i-1][1], m1=c[i][0], g1=c[i][1];
+      return m0 + ((gold-g0)/(g1-g0))*(m1-m0);
+    }
+  }
+  const last = c[c.length-1];
+  return last[0] + (gold-last[1])/700;
+}
+
+function buildTiming(order, agg, me){
+  const pace = LANE_PACE[me.lane] || 1;
+  let cum = 0;
+  const items = order.map(b=>{
+    cum += b.item.cost;
+    return {item:b.item, matched:b.matched, cum, min: Math.max(1, Math.round(minuteForGold(cum/pace)))};
+  });
+  const fullMin = items.length ? items[items.length-1].min : 0;
+  const notes = [];
+
+  const sustainSrc = agg.antiheal || agg.regen || agg.lifesteal;
+  const anti = items.find(i=>i.item.answers.includes("antiheal"));
+  if(anti && sustainSrc){
+    notes.push(`Anti-heal online by ~${anti.min} min, before ${sustainSrc.heroes.slice(0,2).join(" and ")} start healing through your damage.`);
+  }
+  if(agg.snowball){
+    notes.push(`${agg.snowball.heroes[0]} snowballs early. If you are behind at ~5 min, take your defensive item before your second damage item.`);
+  }
+  if(me.lane==="Roam"){
+    notes.push("Roam income is the slowest in the game, so treat these times as optimistic and buy the cheap utility items first.");
+  } else if(me.lane==="Jungle"){
+    notes.push("Jungle clears faster than lanes, so expect your core about a minute ahead of these numbers.");
+  }
+
+  return {items, fullMin, notes};
+}
+
+/* ---------- spells ---------- */
+function pickSpell(agg, me){
+  if(me.lane==="Jungle") return {spell:DB.spells.find(s=>s.id==="retribution")||DB.spells[0], forced:true};
+  const scored = DB.spells.map(sp=>{
+    let raw = 0; const matched = [];
+    sp.answers.forEach(a=>{ if(agg[a]){ raw += agg[a].w; matched.push(a); } });
+    return {sp, score:raw, matched};
+  }).sort((a,b)=>b.score-a.score);
+  return {spell:scored[0].sp, matched:scored[0].matched, forced:false, alt:scored.slice(1,3)};
+}
+
+/* ---------- emblem ---------- */
+function pickEmblem(agg, me){
+  const base = EMBLEMS[me.role] || EMBLEMS.Fighter;
+  const magicW = (agg.magic?agg.magic.w:0) + (agg.poke?agg.poke.w:0)*0.5;
+  const physW  = (agg.phys?agg.phys.w:0) + (agg.dps?agg.dps.w:0)*0.5;
+  const burstW = (agg.burst?agg.burst.w:0) + (agg.execute?agg.execute.w:0);
+  const sustainW = (agg.antiheal?agg.antiheal.w:0) + (agg.regen?agg.regen.w:0);
+
+  let t1 = base.t1, t2 = base.t2, t3 = base.t3;
+  const notes = [];
+
+  if(magicW > physW + 0.6){ t1 = "Firmness"; notes.push("magic-heavy enemy team"); }
+  else if(physW > magicW + 0.6){ t1 = "Vitality"; notes.push("physical-heavy enemy team"); }
+
+  if(burstW >= 2.2){ t3 = "Lethal Ignition"; notes.push("burst comp: take damage talents"); }
+  else if(sustainW >= 1.8){ t3 = "Festival of Blood"; notes.push("sustain comp: healing talent"); }
+
+  if((agg.cc?agg.cc.w:0) >= 2.0){ t2 = "Pull Yourself Together"; notes.push("heavy CC: cooldown talent"); }
+
+  return {set:base.set, t1, t2, t3, note: notes.length?notes.join("; "):"standard setup for your role"};
+}
+
+/* ---------- threats ---------- */
+function rankThreats(enemies){
+  const rows = enemies.map(h=>{
+    let s = 0;
+    h.threats.forEach(t=>{ if(TAG[t]) s += TAG[t].w; });
+    s *= (ROLE_W[h.role]||1);
+    return {hero:h, score:s, labels:h.threats.filter(t=>TAG[t]).map(t=>TAG[t].label)};
+  }).sort((a,b)=>b.score-a.score);
+  const max = rows.length?rows[0].score:1;
+  rows.forEach(r=>r.pct = Math.round((r.score/max)*100));
+  return rows;
+}
+
+/* ---------- countered-by ---------- */
+function counteredBy(me, enemies){
+  if(!me) return [];
+  return enemies.filter(e=>(ROLE_BEATS[e.role]||[]).includes(me.role));
+}
+
+/* ============================================================
+   ENGINE: draft counter picks
+   ============================================================ */
+function counterPicks(enemies){
+  const enemyIds = new Set(enemies.map(e=>e.id));
+  const agg = buildTagAgg(enemies);
+  const rows = DB.heroes.filter(h=>!enemyIds.has(h.id)).map(h=>{
+    let score = 0; const matched = [];
+    h.answers.forEach(a=>{
+      if(agg[a]){ score += agg[a].w; matched.push(a); }
+    });
+    // reward breadth: a hero that answers several of them beats a one-trick
+    const beaten = enemies.filter(e=>e.threats.some(t=>h.answers.includes(t)));
+    score += beaten.length * 0.35;
+    return {hero:h, score, matched:[...new Set(matched)], beaten};
+  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+
+  // keep the list useful: never more than 3 of the same role
+  const out = [], perRole = {};
+  for(const r of rows){
+    const n = perRole[r.hero.role] || 0;
+    if(n >= 3) continue;
+    perRole[r.hero.role] = n + 1;
+    out.push(r);
+    if(out.length >= 12) break;
+  }
+  return out;
+}
+
+/* ============================================================
+   UI: dashboard rebuild
+   ============================================================ */
+const $  = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const initial = n=>String(n).replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase();
+const DMG_LABEL = {phys:"Physical", magic:"Magic", mixed:"Mixed", none:"Utility"};
+const dmgLabel = d=>DMG_LABEL[d] || d;
+
+let view = "build";
+
+/* ---------- atoms ---------- */
+function av(h){
+  const c = ROLE_COLOR[h.role] || "#64748b";
+  return `<span class="av" style="background:${c}">`
+    + `<b aria-hidden="true">${initial(h.name)}</b>`
+    + `<img src="img/${h.id}.webp" alt="" width="128" height="208" loading="lazy" onerror="this.remove()">`
+    + `</span>`;
+}
+
+function panel(title, body, right, variant){
+  return `<div class="panel ${variant||""}">
+    <div class="panelHead"><h2>${title}</h2>${right||""}</div>
+    <div class="panelBody">${body}</div>
+  </div>`;
+}
+
+function emptyState(icon, text){
+  return `<div class="empty"><div class="big">${icon}</div>${text}</div>`;
+}
+
+function heroCard(h){
+  const c = ROLE_COLOR[h.role] || "#64748b";
+  return `<div class="heroBig" data-open-me="1" title="Change hero">
+    <div class="heroArt">
+      <span class="heroBigFallback" style="background:${c}"><b>${initial(h.name)}</b></span>
+      <img class="art" src="img/${h.id}.webp" alt="" width="128" height="208" fetchpriority="high" onerror="this.remove()">
+    </div>
+    <button class="heroBigX" data-clear-me="1" title="Clear hero" aria-label="Clear hero">✕</button>
+    <div class="heroBigMeta">
+      <span class="roleChip">${esc(h.role)} · ${esc(h.lane)}</span>
+      <div class="heroBigName">${esc(h.name)}</div>
+      <div class="heroBigSub">${h.dmg==="none" ? "Utility hero" : esc(dmgLabel(h.dmg))+" damage"}</div>
+    </div>
+  </div>`;
+}
+
+function threatTips(agg, limit){
+  return Object.keys(agg)
+    .filter(t=>TAG[t])
+    .sort((a,b)=>agg[b].w-agg[a].w)
+    .slice(0,limit)
+    .map(t=>{
+      const hs = [...new Set(agg[t].heroes)].slice(0,3).join(", ");
+      return `<li><span class="bullet">▸</span><span><b>${esc(TAG[t].label)}</b>: ${esc(TAG[t].tip)}<br><span class="rowSub">${esc(hs)}</span></span></li>`;
+    }).join("");
+}
+
+/* ============================================================
+   PICKER
+   ============================================================ */
+let pickMode = "me";
+let pickFilter = "All";
+
+function currentList(){
+  if(pickMode==="me") return state.me && DB.byId[state.me] ? [DB.byId[state.me]] : [];
+  return pickMode==="enemies" ? state.enemies : state.draftEnemies;
+}
+
+let pickerReturnFocus = null;
+
+function openPicker(mode){
+  pickerReturnFocus = document.activeElement;
+  pickMode = mode;
+  pickFilter = "All";
+  $("#pickSearch").value = "";
+  $("#picker").hidden = false;
+  renderFilters();
+  renderPickGrid();
+  setTimeout(()=>{ try{ $("#pickSearch").focus(); }catch(e){} }, 60);
+}
+function closePicker(){
+  if($("#picker").hidden) return;
+  $("#picker").hidden = true;
+  if(pickerReturnFocus && pickerReturnFocus.isConnected){
+    try{ pickerReturnFocus.focus(); }catch(e){}
+  }
+}
+
+function renderFilters(){
+  const roles = ["All","Tank","Fighter","Assassin","Mage","Marksman","Support"];
+  $("#pickFilters").innerHTML = roles.map(r=>
+    `<button class="fBtn ${pickFilter===r?"on":""}" data-filter="${r}">${r}</button>`
+  ).join("");
+}
+
+function renderPickGrid(){
+  const q = ($("#pickSearch").value||"").trim().toLowerCase();
+  const sel = new Set(currentList().map(h=>h.id));
+  const heroes = DB.heroes.filter(h=>{
+    if(pickFilter!=="All" && h.role!==pickFilter) return false;
+    if(q && !h.name.toLowerCase().includes(q) && !h.role.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("#pickGrid").innerHTML = heroes.length
+    ? heroes.map(h=>`<button class="gTile ${sel.has(h.id)?"sel":""}" data-pick="${h.id}">
+        ${av(h)}
+        <div class="nm">${esc(h.name)}</div>
+        <div class="rl">${esc(h.role)}</div>
+      </button>`).join("")
+    : `<div class="empty" style="grid-column:1/-1"><div class="big">🔍</div>No hero matches.</div>`;
+
+  const foot = $("#pickFoot");
+  if(foot){
+    const n = currentList().length;
+    foot.innerHTML = pickMode==="me"
+      ? `<span>Tap a hero to set your pick</span><button class="btn primary" data-done="1">Done</button>`
+      : `<span>${n} / 5 selected</span><button class="btn primary" data-done="1">Done</button>`;
+  }
+}
+
+function onPick(heroId){
+  const hero = DB.byId[heroId];
+  if(!hero) return;
+  if(pickMode==="me"){
+    state.me = heroId;
+    saveState(); renderAll(); closePicker();
+    return;
+  }
+  const arr = pickMode==="enemies" ? state.enemies : state.draftEnemies;
+  const i = arr.indexOf(heroId);
+  if(i>=0) arr.splice(i,1);
+  else if(arr.length<5) arr.push(heroId);
+  else return;
+  saveState(); renderAll(); renderPickGrid();
+}
+
+/* ============================================================
+   RENDER: my build
+   ============================================================ */
+function renderMySlot(){
+  const el = $("#mySlot");
+  if(!state.me){
+    el.innerHTML = `<button class="heroEmpty" id="pickMe">
+      <span class="plus">+</span>
+      <span class="t">Choose your hero</span>
+      <span class="s">Search the full roster</span>
+    </button>`;
+    return;
+  }
+  const h = DB.byId[state.me];
+  if(!h){ state.me = null; return renderMySlot(); }
+  el.innerHTML = heroCard(h) + `<div class="chips" style="margin-top:12px">
+    <span>${esc(h.role)}</span><span>${esc(h.lane)}</span>
+    <span>${esc(dmgLabel(h.dmg))}</span>
+  </div>`;
+}
+
+function renderEnemySlot(){
+  const el = $("#enemySlot");
+  $("#enemyCount").textContent = state.enemies.length + " / 5";
+  if(!state.enemies.length){
+    el.innerHTML = `<button class="heroEmpty" id="pickEnemy" style="height:150px">
+      <span class="plus">+</span>
+      <span class="t">Add enemy heroes</span>
+      <span class="s">Up to 5, order does not matter</span>
+    </button>`;
+    return;
+  }
+  const avs = state.enemies.map(id=>DB.byId[id]).filter(Boolean).map(h=>`
+    <div class="enemyAv">
+      <div class="frame">${av(h)}</div>
+      <button class="x" data-rm="${h.id}" title="Remove">✕</button>
+      <div class="nm">${esc(h.name)}</div>
+    </div>`).join("");
+  const add = state.enemies.length<5
+    ? `<button class="enemyAdd" id="pickEnemy" title="Add enemy">+</button>` : "";
+  el.innerHTML = `<div class="enemyRow">${avs}${add}</div>`;
+}
+
+function renderBuild(){
+  const out = $("#buildOut"), side = $("#buildSide"), swap = $("#swapOut");
+  if(swap) swap.innerHTML = "";
+
+  if(!state.me){
+    out.innerHTML = panel("Counter build", emptyState("⚔","Pick your hero to begin."));
+    side.innerHTML = "";
+    return;
+  }
+  if(!state.enemies.length){
+    out.innerHTML = panel("Counter build", emptyState("🎯","Add at least one enemy hero to get a counter build."));
+    side.innerHTML = "";
+    return;
+  }
+
+  const me = DB.byId[state.me];
+  const enemies = state.enemies.map(id=>DB.byId[id]).filter(Boolean);
+  const agg = buildTagAgg(enemies);
+  const threats = rankThreats(enemies);
+  const build = pickBuild(agg, me);
+  const timing = buildTiming(build, agg, me);
+  const spell = pickSpell(agg, me);
+  const emb = pickEmblem(agg, me);
+  const countered = counteredBy(me, enemies);
+  const totalGold = build.reduce((a,b)=>a+b.item.cost,0);
+
+  const magicW = (agg.magic?agg.magic.w:0)+(agg.poke?agg.poke.w:0)*0.4;
+  const physW  = (agg.phys?agg.phys.w:0)+(agg.dps?agg.dps.w:0)*0.4;
+  const profile = magicW>physW+0.5 ? "Magic-heavy" : physW>magicW+0.5 ? "Physical-heavy" : "Mixed";
+
+  let main = "";
+
+  if(countered.length){
+    main += `<div class="warn"><div class="ic">⚠</div><div>
+      <div class="tt">Countered by ${countered.map(c=>esc(c.name)).join(", ")}</div>
+      <div class="dd">${esc(me.name)} struggles into this matchup. Farm safe, hug your tower and wait for your power spike.</div>
+    </div></div>`;
+  }
+
+  const cards = build.map((b,i)=>{
+    const uniq = [...new Set(b.matched)].filter(m=>TAG[m]);
+    const tags = uniq.length
+      ? uniq.map(m=>`<span class="${TAG[m].w>=1.15?"hot":""}">${esc(TAG[m].label)}</span>`).join("")
+      : `<span class="core">Core pick</span>`;
+    return `<div class="itemCard ${i<2?"isCore":""}">
+      <div class="itemIc">
+        <img src="img/items/${b.item.id}.webp" alt="" width="42" height="42" loading="lazy" onerror="this.parentElement.classList.add('noImg');this.remove()">
+        <span class="itemNum">${i+1}</span>
+      </div>
+      <div class="itemBody">
+        <div class="itemName">${esc(b.item.name)}</div>
+        <div class="itemMeta">${b.item.cost.toLocaleString()}g · ${phaseFor(b.item.cost)} · ~${timing.items[i].min}m</div>
+        <div class="itemTags">${tags}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  main += panel("Counter build", `<div class="itemGrid">${cards}</div>`,
+    `<span class="counter">${totalGold.toLocaleString()}g</span>`);
+
+  const tl = timing.items.map((t,i)=>
+    `<div class="tlRow ${i<2?"key":""}">
+      <span class="tlIc"><img src="img/items/${t.item.id}.webp" alt="" width="22" height="22" loading="lazy" onerror="this.parentElement.classList.add('noImg');this.remove()"></span>
+      <span class="tlTime">~${t.min}m</span>
+      <span class="tlName">${esc(t.item.name)}</span>
+      <span class="tlGold">${t.cum.toLocaleString()}g</span></div>`).join("");
+  const notes = timing.notes.map(n=>
+    `<div class="tlNote"><span class="d">▸</span><span>${esc(n)}</span></div>`).join("");
+
+  main += panel("Build timing", `<div class="tl">${tl}</div>${notes}`,
+    `<span class="counter">online ~${timing.fullMin}m</span>`);
+
+  out.innerHTML = main;
+
+  /* ---------- side column ---------- */
+  const rows = threats.map(t=>`
+    <div class="row">
+      <div class="rowAv">${av(t.hero)}</div>
+      <div class="rowBody">
+        <div class="rowHead"><span class="rowName">${esc(t.hero.name)}</span>
+          <span class="rowVal">${t.score.toFixed(1)}</span></div>
+        <div class="rowSub">${esc(t.labels.join(" · "))}</div>
+        <div class="rowBar"><i style="width:${t.pct}%"></i></div>
+      </div>
+    </div>`).join("");
+
+  const loadout = `<div class="miniGrid">
+    <div class="mini">
+      <div class="miniTop">
+        <span class="miniIcon"><img src="img/spells/${spell.spell.id}.webp" alt="" width="34" height="34" onerror="this.parentElement.textContent='⚡'"></span>
+        <span class="miniLabel">Battle spell</span>
+      </div>
+      <div class="miniVal">${esc(spell.spell.name)}</div>
+      <div class="miniSub">${esc(spell.spell.why)}${spell.forced?" (jungler default)":""}</div>
+    </div>
+    <div class="mini">
+      <div class="miniTop">
+        <span class="miniIcon"><img src="img/emblems/${emb.set.toLowerCase()}.webp" alt="" width="34" height="34" onerror="this.parentElement.textContent='◈'"></span>
+        <span class="miniLabel">Emblem</span>
+      </div>
+      <div class="miniVal">${esc(emb.set)}</div>
+      <div class="miniSub">${esc(emb.t1)} · ${esc(emb.t2)} · ${esc(emb.t3)}</div>
+    </div>
+  </div>
+  ${spell.alt?`<div class="miniSub" style="margin-top:10px">Alternatives: ${spell.alt.map(a=>esc(a.sp.name)).join(" · ")}</div>`:""}
+  <div class="miniSub" style="margin-top:6px">${esc(emb.note)}</div>`;
+
+  const tips = threatTips(agg, 6) || emptyState("✓","Nothing dangerous in this lineup.");
+
+  side.innerHTML = panel("Threat ranking", rows, `<span class="counter">${profile}</span>`)
+    + panel("Loadout", loadout)
+    + panel("How to beat them", `<ul class="tips">${tips}</ul>`);
+
+  /* ---------- left column: better picks into this comp ---------- */
+  if(swap){
+    const swaps = counterPicks(enemies).filter(p=>p.hero.id!==me.id).slice(0,3);
+    if(swaps.length){
+      const srows = swaps.map((p,i)=>`
+        <button class="swapRow" data-swap="${p.hero.id}" title="Play ${esc(p.hero.name)} instead">
+          <div class="rowNum ${i===0?"top":""}">${i+1}</div>
+          <div class="rowAv">${av(p.hero)}</div>
+          <div class="rowBody">
+            <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
+              <span class="rowVal">${esc(p.hero.role)}</span></div>
+            <div class="rowSub">Counters ${p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "this comp"}</div>
+          </div>
+        </button>`).join("");
+      swap.innerHTML = panel("Better picks", srows,
+        `<span class="counter">tap to switch</span>`);
+    }
+  }
+}
+
+/* ============================================================
+   RENDER: counter picks
+   ============================================================ */
+function renderDraftSlot(){
+  const el = $("#draftSlot");
+  $("#draftCount").textContent = state.draftEnemies.length + " / 5";
+  if(!state.draftEnemies.length){
+    el.innerHTML = `<button class="heroEmpty" id="pickDraft" style="height:150px">
+      <span class="plus">+</span>
+      <span class="t">Add enemy heroes</span>
+      <span class="s">Who did they lock in?</span>
+    </button>`;
+    return;
+  }
+  const avs = state.draftEnemies.map(id=>DB.byId[id]).filter(Boolean).map(h=>`
+    <div class="enemyAv">
+      <div class="frame">${av(h)}</div>
+      <button class="x" data-rm="${h.id}" title="Remove">✕</button>
+      <div class="nm">${esc(h.name)}</div>
+    </div>`).join("");
+  const add = state.draftEnemies.length<5
+    ? `<button class="enemyAdd" id="pickDraft" title="Add enemy">+</button>` : "";
+  el.innerHTML = `<div class="enemyRow">${avs}${add}</div>`;
+}
+
+function renderDraft(){
+  const out = $("#draftOut"), side = $("#draftSide");
+
+  if(!state.draftEnemies.length){
+    out.innerHTML = panel("Best counter picks", emptyState("🧠","Add their picks and I'll rank the best counter heroes."));
+    side.innerHTML = "";
+    return;
+  }
+
+  const enemies = state.draftEnemies.map(id=>DB.byId[id]).filter(Boolean);
+  const picks = counterPicks(enemies);
+  const agg = buildTagAgg(enemies);
+
+  const rows = picks.map((p,i)=>{
+    const beaten = p.beaten && p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "their comp";
+    const tags = p.matched.filter(m=>TAG[m]).map(m=>`<span>${esc(TAG[m].label)}</span>`).join("");
+    return `<div class="row">
+      <div class="rowNum ${i<3?"top":""}">${i+1}</div>
+      <div class="rowAv">${av(p.hero)}</div>
+      <div class="rowBody">
+        <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
+          <span class="rowVal">${esc(p.hero.role)} · ${esc(p.hero.lane)}</span></div>
+        <div class="rowSub">Shuts down ${beaten}</div>
+        <div class="itemTags">${tags}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  out.innerHTML = panel("Best counter picks", rows, `<span class="counter">top ${picks.length}</span>`);
+
+  const chips = Object.keys(agg).filter(t=>TAG[t]).sort((a,b)=>agg[b].w-agg[a].w).slice(0,8)
+    .map(t=>`<span class="hot">${esc(TAG[t].label)} ×${agg[t].count}</span>`).join("");
+
+  const tips = threatTips(agg, 4) || emptyState("✓","Nothing dangerous in this lineup.");
+
+  side.innerHTML = panel("Their threats", `<div class="chips">${chips}</div>`)
+    + panel("Draft plan", `<ul class="tips">${tips}</ul>`);
+}
+
+/* ============================================================
+   RENDER: roster
+   ============================================================ */
+let rosterFilter = "All";
+
+function renderRoster(){
+  const grid = $("#rosterGrid");
+  if(!grid) return;
+
+  const roles = ["All","Tank","Fighter","Assassin","Mage","Marksman","Support"];
+  $("#rosterFilters").innerHTML = roles.map(r=>
+    `<button class="fBtn ${rosterFilter===r?"on":""}" data-rfilter="${r}">${r}</button>`
+  ).join("");
+
+  const q = ($("#rosterSearch").value||"").trim().toLowerCase();
+  const list = DB.heroes.filter(h=>{
+    if(rosterFilter!=="All" && h.role!==rosterFilter) return false;
+    if(q && !h.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("#rosterCount").textContent = list.length + " / " + DB.heroes.length;
+
+  grid.innerHTML = list.length
+    ? list.map(h=>`<button class="rosterTile" data-roster-hero="${h.id}">
+        ${av(h)}
+        <div class="nm">${esc(h.name)}</div>
+        <div class="rl">${esc(h.role)}</div>
+      </button>`).join("")
+    : `<div class="empty" style="grid-column:1/-1"><div class="big">🔍</div>No hero matches.</div>`;
+}
+
+/* ============================================================
+   RENDER ALL + NAV
+   ============================================================ */
+function renderAll(){
+  renderMySlot();
+  renderEnemySlot();
+  renderBuild();
+  renderDraftSlot();
+  renderDraft();
+  if(view==="roster") renderRoster();
+  const rp = $("#rosterPill");
+  if(rp) rp.textContent = DB.heroes.length + " heroes";
+}
+
+function syncMeta(){
+  $("#verTag").textContent = "v" + String(DB.version).split("·")[0].trim();
+  const rp = $("#rosterPill");
+  if(rp) rp.textContent = DB.heroes.length + " heroes";
+  if($("#setVer")) fillSettings();
+}
+
+function setView(v){
+  view = v;
+  $$(".view").forEach(el=>{ el.hidden = el.id !== "view-"+v; });
+  $$(".navTab[data-view]").forEach(b=>b.classList.toggle("is-active", b.dataset.view===v));
+  if(v==="roster") renderRoster();
+  if(v==="settings") fillSettings();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+document.addEventListener("click", e=>{
+  const t = e.target;
+
+  const nav = t.closest("[data-view]");
+  if(nav){ setView(nav.dataset.view); return; }
+
+  if(t.closest("#pickMe"))    return openPicker("me");
+  if(t.closest("#pickEnemy")) return openPicker("enemies");
+  if(t.closest("#pickDraft")) return openPicker("draft");
+
+  if(t.closest("[data-clear-me]")){
+    state.me = null; saveState(); renderAll(); return;
+  }
+  if(t.closest("[data-open-me]")) return openPicker("me");
+
+  const rm = t.closest("[data-rm]");
+  if(rm){
+    const id = rm.dataset.rm;
+    state.enemies = state.enemies.filter(x=>x!==id);
+    state.draftEnemies = state.draftEnemies.filter(x=>x!==id);
+    if(state.me===id) state.me = null;
+    saveState(); renderAll(); return;
+  }
+
+  const pick = t.closest("[data-pick]");
+  if(pick) return onPick(pick.dataset.pick);
+
+  const f = t.closest("[data-filter]");
+  if(f){ pickFilter = f.dataset.filter; renderFilters(); renderPickGrid(); return; }
+
+  const rf = t.closest("[data-rfilter]");
+  if(rf){ rosterFilter = rf.dataset.rfilter; renderRoster(); return; }
+
+  const rt = t.closest("[data-roster-hero]");
+  if(rt){
+    state.me = rt.dataset.rosterHero;
+    saveState(); renderAll(); setView("build"); return;
+  }
+
+  const sw = t.closest("[data-swap]");
+  if(sw){
+    state.me = sw.dataset.swap;
+    saveState(); renderAll(); return;
+  }
+
+  if(t.closest("#pickClose") || t.closest("[data-done]")) return closePicker();
+  if(t.id === "picker") return closePicker();
+});
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){ closePicker(); return; }
+  if(e.key==="Tab" && !$("#picker").hidden){
+    const focusable = $("#picker").querySelectorAll('button:not([disabled]), input, [tabindex]:not([tabindex="-1"])');
+    if(!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function fillSettings(){
+  $("#setVer").textContent = DB.version;
+  $("#setHeroes").textContent = DB.heroes.length;
+  $("#setItems").textContent = DB.items.length;
+  $("#setSpells").textContent = DB.spells.length;
+  $("#dataUrl").value = localStorage.getItem("mlbbcf:url")||"";
+}
+
+function setStatus(msg, cls){
+  const el = $("#syncStatus");
+  if(!el) return;
+  el.textContent = msg;
+  el.className = "status " + (cls||"");
+}
+
+async function doSync(){
+  const url = $("#dataUrl").value.trim();
+  if(!url){ setStatus("Paste a URL first.", "err"); return; }
+  localStorage.setItem("mlbbcf:url", url);
+  setStatus("Fetching…");
+  try{
+    const res = await fetch(url, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const raw = await res.json();
+    if(!raw || !Array.isArray(raw.heroes) || raw.heroes.length<10) throw new Error("not a valid data file");
+    saveData(raw);
+    DB = normalize(raw);
+    setStatus("Synced · "+DB.heroes.length+" heroes · "+DB.version, "ok");
+    syncMeta(); renderAll();
+  }catch(err){
+    setStatus("Sync failed: "+err.message, "err");
+  }
+}
+
+function doExport(){
+  const raw = JSON.parse(localStorage.getItem("mlbbcf:data")||"null") || BUILTIN;
+  const blob = new Blob([JSON.stringify(raw,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "mlbb-data.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+$("#btnSync").addEventListener("click", doSync);
+$("#btnExport").addEventListener("click", doExport);
+$("#btnImport").addEventListener("click", ()=>$("#fileImport").click());
+$("#rosterSearch").addEventListener("input", renderRoster);
+$("#pickSearch").addEventListener("input", renderPickGrid);
+
+$("#fileImport").addEventListener("change", e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const raw = JSON.parse(r.result);
+      if(!raw.heroes || !raw.items) throw new Error("missing heroes/items");
+      saveData(raw); DB = normalize(raw);
+      setStatus("Imported "+DB.heroes.length+" heroes · "+DB.version, "ok");
+      syncMeta(); renderAll();
+    }catch(err){ setStatus("Import failed: "+err.message, "err"); }
+  };
+  r.readAsText(file);
+  e.target.value = "";
+});
+
+$("#btnReset").addEventListener("click", ()=>{
+  state.me = null; state.enemies = []; state.draftEnemies = [];
+  saveState(); renderAll();
+});
+
+$("#btnResetData").addEventListener("click", ()=>{
+  localStorage.removeItem("mlbbcf:data");
+  DB = normalize(BUILTIN);
+  setStatus("Built-in data restored.", "ok");
+  syncMeta(); renderAll();
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+(function boot(){
+  loadData();
+  loadState();
+  if(state.me && !DB.byId[state.me]) state.me = null;
+  state.enemies = state.enemies.filter(id=>DB.byId[id]).slice(0,5);
+  state.draftEnemies = state.draftEnemies.filter(id=>DB.byId[id]).slice(0,5);
+
+  syncMeta();
+  renderAll();
+  setView("build");
+
+  const url = localStorage.getItem("mlbbcf:url");
+  if(url){
+    fetch(url,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(raw=>{
+      if(raw && Array.isArray(raw.heroes) && raw.heroes.length>10){
+        saveData(raw); DB = normalize(raw);
+        syncMeta(); renderAll();
+      }
+    }).catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
