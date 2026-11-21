@@ -232,6 +232,8 @@ svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-l
 }
 .tag.hot{background:var(--red);color:#fff}
 .tag.core{background:var(--gold);color:var(--bg)}
+.itemWhy{font:400 11.5px/1.45 var(--font-body);color:var(--mut);margin-top:5px}
+.itemVs{font:700 10px/1.4 var(--font-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--blueTxt);margin-top:5px}
 
 /* ---------- build timeline ---------- */
 .tl{position:relative;padding-left:30px}
@@ -268,6 +270,9 @@ svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-l
 /* ---------- swap row ---------- */
 .swapRow{display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
 .swapRow:last-child{border-bottom:0}
+.swapHead{font:700 10px/1 var(--font-disp);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:13px 0 3px}
+.swapHead:first-child{margin-top:0}
+.swapNote{font:400 12px/1.5 var(--font-body);color:var(--mut);padding:2px 0}
 .slot{flex:1;min-width:0;display:flex;gap:10px;align-items:center}
 .s{font:700 11px/1.3 var(--font-body);color:var(--mut)}
 
@@ -1176,19 +1181,22 @@ function counteredBy(me, enemies){
 /* ============================================================
    ENGINE: draft counter picks
    ============================================================ */
+/* score one hero against a comp: answers weighted by threat weight,
+   plus breadth (a hero that answers several of them beats a one-trick) */
+function scoreHeroAgainst(h, agg, enemies){
+  let score = 0; const matched = [];
+  h.answers.forEach(a=>{ if(agg[a]){ score += agg[a].w; matched.push(a); } });
+  const beaten = enemies.filter(e=>e.threats.some(t=>h.answers.includes(t)));
+  score += beaten.length * 0.35;
+  return {hero:h, score, matched:[...new Set(matched)], beaten};
+}
+
 function counterPicks(enemies){
   const enemyIds = new Set(enemies.map(e=>e.id));
   const agg = buildTagAgg(enemies);
-  const rows = DB.heroes.filter(h=>!enemyIds.has(h.id)).map(h=>{
-    let score = 0; const matched = [];
-    h.answers.forEach(a=>{
-      if(agg[a]){ score += agg[a].w; matched.push(a); }
-    });
-    // reward breadth: a hero that answers several of them beats a one-trick
-    const beaten = enemies.filter(e=>e.threats.some(t=>h.answers.includes(t)));
-    score += beaten.length * 0.35;
-    return {hero:h, score, matched:[...new Set(matched)], beaten};
-  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+  const rows = DB.heroes.filter(h=>!enemyIds.has(h.id))
+    .map(h=>scoreHeroAgainst(h, agg, enemies))
+    .filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
 
   // keep the list useful: never more than 3 of the same role
   const out = [], perRole = {};
@@ -1200,6 +1208,34 @@ function counterPicks(enemies){
     if(out.length >= 12) break;
   }
   return out;
+}
+
+/* same-category report: where does my hero rank within its own role,
+   and which same-role heroes score higher into this comp */
+function sameRoleReport(me, enemies){
+  const enemyIds = new Set(enemies.map(e=>e.id));
+  const agg = buildTagAgg(enemies);
+  const pool = DB.heroes.filter(h=>h.role===me.role && !enemyIds.has(h.id));
+  const scored = pool.map(h=>scoreHeroAgainst(h, agg, enemies)).sort((a,b)=>b.score-a.score);
+  const mine = scored.find(r=>r.hero.id===me.id) || {hero:me, score:0, matched:[], beaten:[]};
+  const rank = scored.indexOf(mine) + 1;
+  const better = scored.filter(r=>r.hero.id!==me.id && r.score>0).slice(0,3);
+  return {mine, rank, total:scored.length, better};
+}
+
+/* human reason for a build item: what it does + who it answers here */
+function itemReason(b, agg){
+  const what = b.item.why || "";
+  const uniq = [...new Set(b.matched)].filter(t=>TAG[t] && agg[t])
+    .sort((a,b)=>agg[b].w-agg[a].w);
+  if(!uniq.length) return {what, vs:""};
+  const seen = new Set();
+  const vs = uniq.slice(0,2).map(t=>{
+    const hs = [...new Set(agg[t].heroes)].filter(h=>!seen.has(h));
+    hs.slice(0,2).forEach(h=>seen.add(h));
+    return TAG[t].label + (hs.length ? " (" + hs.slice(0,2).join(", ") + ")" : "");
+  }).join(" + ");
+  return {what, vs:"Answers " + vs};
 }
 
 /* ============================================================
@@ -1428,6 +1464,7 @@ function renderBuild(){
     const tags = uniq.length
       ? uniq.map(m=>`<span class="${TAG[m].w>=1.15?"hot":""}">${esc(TAG[m].label)}</span>`).join("")
       : `<span class="core">Core pick</span>`;
+    const why = itemReason(b, agg);
     return `<div class="itemCard ${i<2?"isCore":""}">
       <div class="itemIc">
         <img src="img/items/${b.item.id}.webp" alt="" width="42" height="42" loading="lazy" onerror="this.parentElement.classList.add('noImg');this.remove()">
@@ -1436,6 +1473,8 @@ function renderBuild(){
       <div class="itemBody">
         <div class="itemName">${esc(b.item.name)}</div>
         <div class="itemMeta">${b.item.cost.toLocaleString()}g · ${phaseFor(b.item.cost)} · ~${timing.items[i].min}m</div>
+        <div class="itemWhy">${esc(why.what)}</div>
+        ${why.vs?`<div class="itemVs">${esc(why.vs)}</div>`:""}
         <div class="itemTags">${tags}</div>
       </div>
     </div>`;
@@ -1499,21 +1538,31 @@ function renderBuild(){
 
   /* ---------- left column: better picks into this comp ---------- */
   if(swap){
-    const swaps = counterPicks(enemies).filter(p=>p.hero.id!==me.id).slice(0,3);
-    if(swaps.length){
-      const srows = swaps.map((p,i)=>`
-        <button class="swapRow" data-swap="${p.hero.id}" title="Play ${esc(p.hero.name)} instead">
-          <div class="rowNum ${i===0?"top":""}">${i+1}</div>
-          <div class="rowAv">${av(p.hero)}</div>
-          <div class="rowBody">
-            <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
-              <span class="rowVal">${esc(p.hero.role)}</span></div>
-            <div class="rowSub">Counters ${p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "this comp"}</div>
-          </div>
-        </button>`).join("");
-      swap.innerHTML = panel("Better picks", srows,
-        `<span class="counter">tap to switch</span>`);
+    const rep = sameRoleReport(me, enemies);
+    const cross = counterPicks(enemies).filter(p=>p.hero.id!==me.id).slice(0,3);
+    const swapBtn = (p,i)=>`
+      <button class="swapRow" data-swap="${p.hero.id}" title="Play ${esc(p.hero.name)} instead">
+        <div class="rowNum ${i===0?"top":""}">${i+1}</div>
+        <div class="rowAv">${av(p.hero)}</div>
+        <div class="rowBody">
+          <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
+            <span class="rowVal">${p.score.toFixed(1)}</span></div>
+          <div class="rowSub">Shuts down ${p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "this comp"}</div>
+        </div>
+      </button>`;
+    let body = "";
+    if(rep.better.length){
+      body += `<div class="swapHead">Better ${esc(me.role)} picks · you rank #${rep.rank} of ${rep.total}</div>`;
+      body += rep.better.map(swapBtn).join("");
+    } else {
+      body += `<div class="swapNote">You are the #${rep.rank} ${esc(me.role)} pick into this comp (${rep.total} in category). Stay on ${esc(me.name)}.</div>`;
     }
+    if(cross.length){
+      body += `<div class="swapHead">Other roles</div>`;
+      body += cross.map(swapBtn).join("");
+    }
+    swap.innerHTML = panel("Better picks", body,
+      `<span class="counter">tap to switch</span>`);
   }
 }
 
@@ -1555,6 +1604,28 @@ function renderDraft(){
   const picks = counterPicks(enemies);
   const agg = buildTagAgg(enemies);
 
+  let main = "";
+
+  /* same-category block: better heroes in YOUR role, not just other lanes */
+  if(state.me && DB.byId[state.me] && !enemies.some(e=>e.id===state.me)){
+    const mine = DB.byId[state.me];
+    const rep = sameRoleReport(mine, enemies);
+    if(rep.better.length){
+      const rrows = rep.better.map((p,i)=>`
+        <button class="swapRow" data-swap="${p.hero.id}" title="Play ${esc(p.hero.name)} instead">
+          <div class="rowNum ${i===0?"top":""}">${i+1}</div>
+          <div class="rowAv">${av(p.hero)}</div>
+          <div class="rowBody">
+            <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
+              <span class="rowVal">${p.score.toFixed(1)}</span></div>
+            <div class="rowSub">Shuts down ${p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "their comp"}</div>
+          </div>
+        </button>`).join("");
+      main += panel(`Better ${esc(mine.role)} picks`, rrows,
+        `<span class="counter">you rank #${rep.rank} of ${rep.total}</span>`);
+    }
+  }
+
   const rows = picks.map((p,i)=>{
     const beaten = p.beaten && p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "their comp";
     const tags = p.matched.filter(m=>TAG[m]).map(m=>`<span>${esc(TAG[m].label)}</span>`).join("");
@@ -1570,7 +1641,7 @@ function renderDraft(){
     </div>`;
   }).join("");
 
-  out.innerHTML = panel("Best counter picks", rows, `<span class="counter">top ${picks.length}</span>`);
+  out.innerHTML = main + panel("Best counter picks", rows, `<span class="counter">top ${picks.length}</span>`);
 
   const chips = Object.keys(agg).filter(t=>TAG[t]).sort((a,b)=>agg[b].w-agg[a].w).slice(0,8)
     .map(t=>`<span class="hot">${esc(TAG[t].label)} ×${agg[t].count}</span>`).join("");
