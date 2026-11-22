@@ -811,9 +811,8 @@ const ITEMS_RAW = [
 ["clock","Clock of Destiny",2000,"magic","tank,burst","+60 Magic Power · HP stacking","Scales into a durable late-game mage."],
 ["truncheon","Lightning Truncheon",2100,"magic","burst,aoe","+75 Magic Power · Mana","Chain burst damage on ability casts."],
 ["glowing","Glowing Wand",2000,"magic","antiheal,poke,regen","+75 Magic Power · +5% Move Spd","Burn damage that also chips healing."],
-["necklace","Necklace of Durance",2200,"magic","antiheal,regen,lifesteal,shield","+70 Magic Power · 15% CDR","Anti-heal for mages. Mandatory vs sustain comps."],
 ["concentrated","Concentrated Energy",2000,"magic","lifesteal,dps","+70 Magic Power · +HP · Lifesteal","Sustain so you can trade and stay in lane."],
-["winter","Winter Truncheon",1900,"magic","burst,execute,immune","+60 Magic Power · +Armor","Freeze yourself through their burst combo."],
+["winter","Winter Crown",1900,"magic","burst,execute,immune","+60 Magic Power · +Armor","Freeze yourself through their burst combo."],
 ["icequeen","Ice Queen Wand",2000,"magic","slow,mobility","+75 Magic Power · +Move Spd","Slows on hit, which shuts down divers."],
 ["feather","Feather of Heaven",2000,"magic","dps,poke","+Magic Power · +Atk Spd","Hybrid scaling for basic-attack mages."],
 ["fleeting","Fleeting Time",2000,"magic","burst","+Magic Power · 15% CDR","Ult cooldown resets on takedown."],
@@ -825,27 +824,23 @@ const ITEMS_RAW = [
 ["bladearmor","Blade Armor",2100,"def","phys,dps","+70 Phys DEF","Reflects damage back at auto attackers."],
 ["oracle","Oracle",2100,"def","antiheal,magic,regen","+850 HP · +Magic DEF · +CDR","Boosts your own healing, resists magic."],
 ["cursed","Cursed Helmet",2000,"def","tank,summon,aoe","+920 HP · +Magic DEF","Burns nearby enemies, clearing summons."],
-["twilight","Twilight Armor",2200,"def","burst,phys,execute","+950 HP · +Phys DEF","Caps incoming burst damage: anti-one-shot."],
 ["guardian","Guardian Helmet",2100,"def","poke,sustain","+1550 HP · HP regen","Massive HP regen to shrug off poke."],
 ["immortality","Immortality",2100,"def","burst,execute,revive","+800 HP · +Phys DEF","Revive once to bait their full combo."],
 ["bruteforce","Brute Force Breastplate",2000,"def","phys,tank","+770 HP · +Armor","Stacks armor and movement in fights."],
 ["thunderbelt","Thunder Belt",2000,"def","slow,mobility,phys","+HP · +Armor · +Mana","Slows on basic attack, locking down divers."],
-["skyguardian","Sky Guardian Helmet",2500,"def","poke,regen","+1550 HP · Regen","Out-sustain poke comps."],
 
 ["warrior","Warrior Boots",720,"boot","phys,dps","+22 Phys DEF","Armor boots vs physical lanes."],
 ["tough","Tough Boots",720,"boot","cc,magic","+22 Magic DEF · CC reduction","CC reduction: the anti-lockdown boot."],
 ["arcane","Arcane Boots",720,"boot","magic,burst","+Magic PEN","Magic pen for early burst."],
 ["swift","Swift Boots",720,"boot","dps","+Atk Spd","Attack speed for marksman DPS."],
-["magicshoes","Magic Shoes",720,"boot","poke","+10% CDR","Cooldown boots for ability spam."],
-["demon","Demon Shoes",720,"boot","poke","+Mana regen","Mana boots for sustained poke."],
+["magicshoes","Magic Boots",720,"boot","poke","+10% CDR","Cooldown boots for ability spam."],
+["demon","Demon Boots",720,"boot","poke","+Mana regen","Mana boots for sustained poke."],
 ["rapid","Rapid Boots",720,"boot","mobility,slow","+Move Spd","Movement boots to dodge skillshots."],
 
 ["conceal","Conceal",1200,"roam","stealth,burst","Team invisibility","Engage or escape tool for the roam."],
 ["encourage","Encourage",1200,"roam","dps","Team ATK buff","Buff your carry's damage."],
 ["direhit","Dire Hit",1200,"roam","burst","Team damage amp","Amp burst for picks."],
 ["favor","Favor",1200,"roam","burst,regen","Team shield + regen","Protects against burst."],
-["avarice","Avarice",1200,"roam","poke","Gold generation","Economy for late scaling."],
-["pulling","Pull Yourself Together",1200,"roam","cc,burst","CDR for team","Faster ults against CC comps."]
 ];
 
 /* ---------- SPELLS ---------- [id, name, answers, why] */
@@ -875,7 +870,7 @@ const EMBLEMS = {
 
 /* ---------- THREAT TAG LIBRARY ---------- */
 const TAG = {
-  antiheal:{label:"Sustain",       w:1.35, tip:"Build anti-heal BEFORE their sustain snowballs. Sea Halberd (physical) or Necklace of Durance (magic)."},
+  antiheal:{label:"Sustain",       w:1.35, tip:"Build anti-heal BEFORE their sustain snowballs. Sea Halberd (physical) or Glowing Wand (magic)."},
   cc:      {label:"Hard CC",       w:1.20, tip:"Respect their CC range. Tough Boots plus Purify if you keep getting locked down, and never clump for AoE CC."},
   burst:   {label:"Burst",         w:1.18, tip:"They kill you in one combo. Buy HP or a shield item and never walk into them alone."},
   trueDmg: {label:"True damage",   w:1.20, tip:"Resistances do nothing against true damage. Stack raw HP instead of armor."},
