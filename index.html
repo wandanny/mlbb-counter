@@ -14,6 +14,24 @@
    Dial: ENERGY 3 / RHYTHM 2 / MOTION 1
    ============================================================ */
 
+/* Barlow Condensed: DIN-style broadcast display face, bundled so
+   phones see the same identity as Windows (Bahnschrift fallback).
+   OFL license ships alongside in img/fonts/OFL.txt. */
+@font-face{
+  font-family:"Barlow Condensed";
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url("img/fonts/barlow-condensed-700.woff2") format("woff2");
+}
+@font-face{
+  font-family:"Barlow Condensed";
+  font-style:normal;
+  font-weight:800;
+  font-display:swap;
+  src:url("img/fonts/barlow-condensed-800.woff2") format("woff2");
+}
+
 :root{
   --bg:#090c11;
   --panel:#1c2433;
@@ -34,7 +52,7 @@
 
   --ch:10px;           /* the chamfer. one motif, used everywhere */
 
-  --font-disp:"Bahnschrift","Arial Narrow","Segoe UI",sans-serif;
+  --font-disp:"Barlow Condensed","Bahnschrift","Arial Narrow","Segoe UI",sans-serif;
   --font-body:"Segoe UI",system-ui,-apple-system,sans-serif;
 }
 
