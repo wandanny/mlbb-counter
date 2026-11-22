@@ -1890,6 +1890,8 @@ function renderDraft(){
   const rows = picks.map((p,i)=>{
     const beaten = p.beaten && p.beaten.length ? p.beaten.map(e=>esc(e.name)).join(", ") : "their comp";
     const tags = p.matched.filter(m=>TAG[m]).map(m=>`<span>${esc(TAG[m].label)}</span>`).join("");
+    const rate = META.rates && META.rates[p.hero.id];
+    const rateLine = rate ? `<div class="metaOverlap">${rate.win}% win · ${rate.ban}% ban · Mythic 7d</div>` : "";
     return `<div class="row">
       <div class="rowNum ${i<3?"top":""}">${i+1}</div>
       <div class="rowAv">${av(p.hero)}</div>
@@ -1897,7 +1899,7 @@ function renderDraft(){
         <div class="rowHead"><span class="rowName">${esc(p.hero.name)}</span>
           <span class="rowVal">${esc(p.hero.role)} · ${esc(p.hero.lane)}</span></div>
         <div class="rowSub">Shuts down ${beaten}</div>
-        <div class="itemTags">${tags}</div>
+        <div class="itemTags">${tags}</div>${rateLine}
       </div>
     </div>`;
   }).join("");
