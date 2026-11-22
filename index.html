@@ -98,6 +98,8 @@ svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-l
   color:var(--mut);background:var(--panel2);padding:6px 10px;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
 }
+.shareBtn{border:0;cursor:pointer;color:var(--blueTxt)}
+.shareBtn:hover{color:#fff;background:var(--blue)}
 
 /* ---------- panel: the core block ---------- */
 .panel{
@@ -469,6 +471,7 @@ button:disabled{cursor:not-allowed;opacity:.5}
       <button class="navTab" data-view="settings">Settings</button>
     </nav>
     <div class="barInfo">
+      <button class="chip shareBtn" id="btnShare" title="Copy a link to this matchup">Share</button>
       <span class="chip" id="verTag">v1.2</span>
       <span class="chip" id="rosterPill">0 heroes</span>
     </div>
@@ -934,6 +937,27 @@ function loadState(){
 }
 function saveState(){
   try{ localStorage.setItem("mlbbcf:state", JSON.stringify(state)); }catch(e){}
+  try{ history.replaceState(null, "", location.pathname + location.search + stateToHash()); }catch(e){}
+}
+
+/* ---------- shareable matchup links (#me=..&enemies=..&draft=..) ---------- */
+function stateToHash(){
+  const parts = [];
+  if(state.me) parts.push("me=" + state.me);
+  if(state.enemies.length) parts.push("enemies=" + state.enemies.join(","));
+  if(state.draftEnemies.length) parts.push("draft=" + state.draftEnemies.join(","));
+  return parts.length ? "#" + parts.join("&") : "";
+}
+function applyHash(){
+  if(location.hash.length < 2) return false;
+  const q = location.hash.slice(1);
+  const get = k => { const m = q.match(new RegExp("(?:^|&)" + k + "=([^&]*)")); return m ? decodeURIComponent(m[1]) : ""; };
+  const me = get("me"), en = get("enemies"), dr = get("draft");
+  if(!me && !en && !dr) return false;
+  state.me = me && DB.byId[me] ? me : null;
+  state.enemies = en ? en.split(",").filter(x=>DB.byId[x]).slice(0,5) : [];
+  state.draftEnemies = dr ? dr.split(",").filter(x=>DB.byId[x]).slice(0,5) : [];
+  return true;
 }
 
 /* ============================================================
@@ -1238,6 +1262,53 @@ function itemReason(b, agg){
   return {what, vs:"Answers " + vs};
 }
 
+/* ---------- team comp verdict ---------- */
+function compVerdict(enemies){
+  const nm = list => {
+    const names = [...new Set(list.map(e=>e.name))];
+    return names.slice(0,3).join(", ") + (names.length>3 ? " +" + (names.length-3) : "");
+  };
+  const has = t => enemies.filter(e=>e.threats.includes(t));
+  const magic = enemies.filter(e=>e.dmg==="magic").length;
+  const phys  = enemies.filter(e=>e.dmg==="phys").length;
+  const mixed = enemies.filter(e=>e.dmg==="mixed").length;
+  const cc      = [...has("cc"), ...has("pull")];
+  const front   = enemies.filter(e=>e.role==="Tank"||e.role==="Fighter"||e.threats.includes("tank"));
+  const sustain = [...has("antiheal"), ...has("regen"), ...has("lifesteal")];
+  const divers  = has("mobility");
+  const stealth = has("stealth");
+  const snow    = has("snowball");
+  const burst   = has("burst");
+
+  const facts = [];
+  const dmgs = [];
+  if(magic) dmgs.push(magic + " magic");
+  if(phys)  dmgs.push(phys + " physical");
+  if(mixed) dmgs.push(mixed + " mixed");
+  if(dmgs.length) facts.push("Damage mix: " + dmgs.join(" · ") + ".");
+  if(cc.length) facts.push("Hard CC: " + cc.length + " (" + nm(cc) + ").");
+  if(front.length) facts.push("Frontline: " + front.length + " (" + nm(front) + ").");
+  else facts.push("No frontliner.");
+  if(sustain.length) facts.push("Sustain: " + nm(sustain) + ".");
+  if(divers.length >= 2) facts.push("Divers: " + nm(divers) + ".");
+  if(stealth.length) facts.push("Stealth: " + nm(stealth) + ".");
+  if(snow.length) facts.push("Early snowball: " + nm(snow) + ".");
+
+  const punish = [];
+  // gaps first: they survive the 3-line cap and are the most actionable
+  if(!front.length) punish.push("No frontline: dive their backline, nobody peels for them.");
+  if(!cc.length) punish.push("No CC: they cannot lock you down, dash and reposition freely.");
+  if(magic >= 3 && magic > phys) punish.push("Magic-heavy: early magic defense (Athena, Radiant) pays off.");
+  if(phys >= 3 && phys > magic) punish.push("Physical-heavy: stack armor, skip magic defense.");
+  if(cc.length >= 3) punish.push("CC-heavy: Purify or Tough Boots, and never clump.");
+  if(burst.length >= 3) punish.push("Burst-heavy: do not walk alone, buy HP before damage.");
+  if(sustain.length) punish.push("Sustain comp: anti-heal online early or they outlast you.");
+  if(divers.length >= 3) punish.push("Mobile comp: fight near your tower, hold your dash.");
+  if(snow.length >= 2) punish.push("Snowball comp: do not feed early, force late teamfights.");
+  if(punish.length < 2) punish.push("Mixed comp: build for their biggest damage source and play your win condition.");
+  return {facts: facts.slice(0,6), punish: punish.slice(0,3)};
+}
+
 /* ============================================================
    UI: dashboard rebuild
    ============================================================ */
@@ -1249,6 +1320,34 @@ const DMG_LABEL = {phys:"Physical", magic:"Magic", mixed:"Mixed", none:"Utility"
 const dmgLabel = d=>DMG_LABEL[d] || d;
 
 let view = "build";
+
+/* ---------- share ---------- */
+async function shareLink(){
+  const base = location.protocol === "file:"
+    ? location.href.split("#")[0]
+    : location.origin + location.pathname;
+  const url = base + stateToHash();
+  let ok = false;
+  try{ await navigator.clipboard.writeText(url); ok = true; }
+  catch(e){
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      ta.remove();
+    }catch(e2){}
+  }
+  const b = $("#btnShare");
+  if(b){
+    b.textContent = ok ? "Copied ✓" : "Copy link";
+    setTimeout(()=>{ b.textContent = "Share"; }, 1600);
+  }
+  if(!ok) window.prompt("Copy this link:", url);
+}
 
 /* ---------- atoms ---------- */
 function av(h){
@@ -1532,7 +1631,15 @@ function renderBuild(){
 
   const tips = threatTips(agg, 6) || emptyState("✓","Nothing dangerous in this lineup.");
 
-  side.innerHTML = panel("Threat ranking", rows, `<span class="counter">${profile}</span>`)
+  const comp = compVerdict(enemies);
+  const compBody = `<ul class="tips">${comp.facts.map(f=>
+    `<li><span class="bullet">▸</span><span>${esc(f)}</span></li>`).join("")}</ul>`
+    + `<div class="swapHead">How to punish</div>`
+    + `<ul class="tips">${comp.punish.map(f=>
+      `<li><span class="bullet">▸</span><span>${esc(f)}</span></li>`).join("")}</ul>`;
+
+  side.innerHTML = panel("Their comp", compBody)
+    + panel("Threat ranking", rows, `<span class="counter">${profile}</span>`)
     + panel("Loadout", loadout)
     + panel("How to beat them", `<ul class="tips">${tips}</ul>`);
 
@@ -1643,12 +1750,16 @@ function renderDraft(){
 
   out.innerHTML = main + panel("Best counter picks", rows, `<span class="counter">top ${picks.length}</span>`);
 
-  const chips = Object.keys(agg).filter(t=>TAG[t]).sort((a,b)=>agg[b].w-agg[a].w).slice(0,8)
-    .map(t=>`<span class="hot">${esc(TAG[t].label)} ×${agg[t].count}</span>`).join("");
-
   const tips = threatTips(agg, 4) || emptyState("✓","Nothing dangerous in this lineup.");
 
-  side.innerHTML = panel("Their threats", `<div class="chips">${chips}</div>`)
+  const comp = compVerdict(enemies);
+  const compBody = `<ul class="tips">${comp.facts.map(f=>
+    `<li><span class="bullet">▸</span><span>${esc(f)}</span></li>`).join("")}</ul>`
+    + `<div class="swapHead">How to punish</div>`
+    + `<ul class="tips">${comp.punish.map(f=>
+      `<li><span class="bullet">▸</span><span>${esc(f)}</span></li>`).join("")}</ul>`;
+
+  side.innerHTML = panel("Their comp", compBody)
     + panel("Draft plan", `<ul class="tips">${tips}</ul>`);
 }
 
@@ -1726,6 +1837,7 @@ document.addEventListener("click", e=>{
   if(t.closest("#pickMe"))    return openPicker("me");
   if(t.closest("#pickEnemy")) return openPicker("enemies");
   if(t.closest("#pickDraft")) return openPicker("draft");
+  if(t.closest("#btnShare"))  return shareLink();
 
   if(t.closest("[data-clear-me]")){
     state.me = null; saveState(); renderAll(); return;
@@ -1863,10 +1975,11 @@ $("#btnResetData").addEventListener("click", ()=>{
    ============================================================ */
 (function boot(){
   loadData();
-  loadState();
+  if(!applyHash()) loadState();
   if(state.me && !DB.byId[state.me]) state.me = null;
   state.enemies = state.enemies.filter(id=>DB.byId[id]).slice(0,5);
   state.draftEnemies = state.draftEnemies.filter(id=>DB.byId[id]).slice(0,5);
+  saveState();
 
   syncMeta();
   renderAll();
